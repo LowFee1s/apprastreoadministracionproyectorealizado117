@@ -85,11 +85,67 @@ void borrarubicacion() async {
   }
 }
 
-class MyApp extends StatefulWidget {
+class MainScreen extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: LocationScreen(),
+    );
+  }
+}
+
+class LocationScreen extends StatefulWidget {
+  @override
+  _LocationScreenState createState() => _LocationScreenState();
+}
+
+class _LocationScreenState extends State<LocationScreen> {
+  bool _isLoading = false;
+
+  void _onButtonPressed() async {
+    setState(() {
+      _isLoading = true;
+    });
+    LocationPermission permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+    } else {
+      Position position = await Geolocator.getCurrentPosition();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MainScreen()),
+      );
+    }
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Activar ubicacion'),
+        ),
+        body: Center(
+          child: _isLoading
+              ? CircularProgressIndicator()
+              : ElevatedButton(
+                  child: Text('Activar ubicacion y continuar'),
+                  onPressed: _onButtonPressed,
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MyAppState extends State<MainScreen> {
   String? _mapStyle;
   GoogleMapController? mapController;
   Set<Marker> _markers = {};
@@ -145,7 +201,7 @@ class _MyAppState extends State<MyApp> {
         Marker marker = Marker(
             markerId: MarkerId('device_location'),
             position: LatLng(position.latitude, position.longitude),
-            infoWindow: InfoWindow(title: 'Mi ubicaion'),
+            infoWindow: InfoWindow(title: 'Mi ubicacion'),
             icon: markerIcon,
             rotation: direction ?? 0);
         setState(() {
@@ -166,11 +222,17 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    Marker? deviceMarker1 = _markers.firstWhere(
+      (marker) => marker.markerId == MarkerId('device_location'),
+    );
+    LatLng rastreo;
+    if (deviceMarker1 != null) {
+      rastreo = deviceMarker1.position ?? LatLng(0, 0);
+    } else {
+      rastreo = LatLng(0, 0);
+    }
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: Text("Mi Aplicacion"),
-        ),
         body: Stack(
           children: [
             GoogleMap(
@@ -182,10 +244,49 @@ class _MyAppState extends State<MyApp> {
                 print("Mapa creado!");
               },
               initialCameraPosition: CameraPosition(
-                target: LatLng(0, 0),
+                target: rastreo,
                 zoom: 17,
               ),
               markers: Provider.of<MarkerProvider>(context).markers,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Center(
+                child: Column(
+                  children: [
+                    SizedBox(height: 49.0),
+                    SizedBox(height: 17),
+                    ElevatedButton(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Icon(
+                            Icons.search,
+                            color: Colors.white70,
+                            size: 40,
+                          ),
+                          Text(
+                            '¿A donde quieres ir?',
+                            style:
+                                TextStyle(fontSize: 17, color: Colors.white70),
+                          ),
+                          Icon(
+                            Icons.arrow_drop_up,
+                            color: Colors.white70,
+                            size: 40,
+                          )
+                        ],
+                      ),
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 49, vertical: 11),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             IconButton(
               icon: Icon(Icons.location_on),
@@ -210,7 +311,7 @@ class _MyAppState extends State<MyApp> {
               stream: _getMarkersStream(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return Container();
                 } else if (snapshot.hasError) {
                   return Text("Error: ${snapshot.error}");
                 } else if (snapshot.hasData) {
