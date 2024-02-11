@@ -7,7 +7,6 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:device_info/device_info.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
@@ -236,6 +235,7 @@ class _MyAppState extends State<MainScreen> {
         body: Stack(
           children: [
             GoogleMap(
+              zoomControlsEnabled: false,
               onMapCreated: (GoogleMapController controller) {
                 mapController = controller;
                 if (_mapStyle != null) {
@@ -245,7 +245,7 @@ class _MyAppState extends State<MainScreen> {
               },
               initialCameraPosition: CameraPosition(
                 target: rastreo,
-                zoom: 17,
+                zoom: 15,
               ),
               markers: Provider.of<MarkerProvider>(context).markers,
             ),
@@ -260,20 +260,29 @@ class _MyAppState extends State<MainScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Icon(
-                            Icons.search,
-                            color: Colors.white70,
-                            size: 40,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Icon(
+                                Icons.search,
+                                color: Colors.white70,
+                                size: 40,
+                              ),
+                              Text(
+                                '¿A donde quieres ir?',
+                                style: TextStyle(
+                                    fontSize: 19, color: Colors.white70),
+                              ),
+                            ],
                           ),
-                          Text(
-                            '¿A donde quieres ir?',
-                            style:
-                                TextStyle(fontSize: 17, color: Colors.white70),
-                          ),
-                          Icon(
-                            Icons.arrow_drop_up,
-                            color: Colors.white70,
-                            size: 40,
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.keyboard_arrow_up,
+                                color: Colors.white70,
+                                size: 40,
+                              ),
+                            ],
                           )
                         ],
                       ),
@@ -288,24 +297,95 @@ class _MyAppState extends State<MainScreen> {
                 ),
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.location_on),
-              onPressed: () {
-                if (mapController != null && _markers.isNotEmpty) {
-                  Marker? deviceMarker = _markers.firstWhere((marker) =>
-                      marker.markerId == MarkerId('device_location'));
-                  if (deviceMarker != null) {
-                    mapController!.animateCamera(
-                      CameraUpdate.newCameraPosition(
-                        CameraPosition(
-                          target: deviceMarker.position,
-                          zoom: 17,
-                        ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 17, 0),
+                  child: Column(
+                    children: [
+                      Align(
+                          alignment: Alignment.bottomRight,
+                          child: Column(
+                            children: [
+                              Container(
+                                height: 50,
+                                width: 50,
+                                child: FloatingActionButton(
+                                  child: Icon(
+                                      Icons.add,
+                                      color: Colors.blueGrey,
+                                  ),
+                                  onPressed: () {
+                                    mapController?.animateCamera(
+                                      CameraUpdate.zoomIn(),
+                                    );
+                                  },
+                                  backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(top: Radius.circular(100))
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                height: 50,
+                                width: 50,
+                                child: FloatingActionButton(
+                                    child: Icon(
+                                        Icons.remove,
+                                        color: Colors.blueGrey,
+                                    ),
+                                    onPressed: () {
+                                      mapController?.animateCamera(
+                                        CameraUpdate.zoomOut(),
+                                      );
+                                    },
+                                  backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(100))
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.fromLTRB(10, 25, 10, 100),
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          shape: CircleBorder(),
+                          padding: EdgeInsets.all(10),
+                          backgroundColor: Colors.orange),
+                      child: Icon(
+                        Icons.my_location_rounded,
+                        color: Colors.white70,
+                        size: 49,
                       ),
-                    );
-                  }
-                }
-              },
+                      onPressed: () {
+                        if (mapController != null && _markers.isNotEmpty) {
+                          Marker? deviceMarker = _markers.firstWhere((marker) =>
+                              marker.markerId == MarkerId('device_location'));
+                          if (deviceMarker != null) {
+                            mapController!.animateCamera(
+                              CameraUpdate.newCameraPosition(
+                                CameraPosition(
+                                  target: deviceMarker.position,
+                                  zoom: 15,
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
             StreamBuilder<Set<Marker>>(
               stream: _getMarkersStream(),
