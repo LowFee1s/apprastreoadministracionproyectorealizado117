@@ -58,6 +58,7 @@ void enviarLocalizacion(Position position) async {
 
 void detenerLocalizacion() {
   positionStream?.cancel();
+
   timer?.cancel();
 }
 
