@@ -42,6 +42,8 @@ void enviarLocalizacion(Position position) async {
   };
   var body = jsonEncode({
     'id_usuario': Iddevice,
+    'Camion': 'Camion',
+    'Ruta': {},
     'localizacion': {'lat': position.latitude, 'lng': position.longitude}
   });
 
