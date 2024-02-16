@@ -33,7 +33,7 @@ void enviarLocalizacion(Position position) async {
   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
   String Iddevice = androidInfo.androidId;
 
-  var url = Uri.parse('https://api-dev-jqhg.2.us-1.fl0.io/update_ubicacion');
+  var url = Uri.parse('https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/update_ubicacion');
   var headers = {
     "Content-type": "application/json",
     "Authorization": "Basic " +
@@ -42,8 +42,57 @@ void enviarLocalizacion(Position position) async {
   };
   var body = jsonEncode({
     'id_usuario': Iddevice,
-    'Camion': 'Camion',
-    'Ruta': {},
+    'Camion': '101 - Ebanos',
+    'Ruta': [
+      {
+        "lat": 25.7969811,
+        "lng": -100.25335319999999
+      },
+      {
+        "lat": 25.796800899999997,
+        "lng": -100.2530536
+      },
+      {
+        "lat": 25.7969811,
+        "lng": -100.25335319999999
+      },
+      {
+        "lat": 25.784658399999998,
+        "lng": -100.2540162
+      },
+      {
+        "lat": 25.784972,
+        "lng": -100.2664976
+      },
+      {
+        "lat": 25.7710959,
+        "lng": -100.2653776
+      },
+      {
+        "lat": 25.7676545,
+        "lng": -100.2919534
+      },
+      {
+        "lat": 25.7238853,
+        "lng": -100.31255279999999
+      },
+      {
+        "lat": 25.757854899999998,
+        "lng": -100.2960626
+      },
+      {
+        "lat": 25.7615654,
+        "lng": -100.28786579999999
+      },
+      {
+        "lat": 25.783837,
+        "lng": -100.2486119
+      },
+      {
+        "lat": 25.796800899999997,
+        "lng": -100.2530536
+      },
+    ],
     'localizacion': {'lat': position.latitude, 'lng': position.longitude}
   });
 
@@ -67,7 +116,7 @@ void borrarubicacion() async {
   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
   String Iddevice = androidInfo.androidId;
 
-  var url = Uri.parse('https://api-dev-jqhg.2.us-1.fl0.io/quitar_ubicacion');
+  var url = Uri.parse('https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/quitar_ubicacion');
   var headers = {
     "Content-type": "application/json",
     "Authorization": "Basic " +
@@ -147,10 +196,84 @@ class _LocationScreenState extends State<LocationScreen> {
   }
 }
 
+class MyButton extends StatefulWidget {
+  @override
+  _MyButtonState createState() => _MyButtonState();
+}
+
+class _MyButtonState extends State<MyButton> {
+  String filter = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 130,
+      width: double.infinity,
+      alignment: Alignment.bottomCenter,
+      child: ElevatedButton(
+        child: Text("Filtar"),
+        onPressed: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('Introduce el camion'),
+                  content: TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        filter = value;
+                      });
+                    },
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text("Ok"),
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                        Set<Marker> markers = await _getFilteredData(context, filter);
+                        Provider.of<MarkerProvider>(context, listen: false).updateMarkers(markers);
+                        print("Filtrado por: $filter");
+                      }
+                    )
+                  ],
+                );
+              },
+          );
+        }
+      ),
+    );
+  }
+}
+
+Future<Set<Marker>> _getFilteredData(BuildContext context, String camion) async {
+  var url = Uri.parse("https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/obtener_ubicacion/$camion");
+  var headers = {
+    "Authorization": "Basic " + base64Encode(utf8.encode("apprastreoadministracionproyectorealizado:PASSCODEFIMERASTREO14")),
+  };
+  var response = await http.get(url, headers: headers);
+  var localizaciones = jsonDecode(response.body);
+
+  return _createMarkersFromdata(localizaciones);
+}
+
+Future<Set<Marker>> _createMarkersFromdata(Map<String, dynamic> data) async {
+  final markerIcon = await BitmapDescriptor.fromAssetImage(ImageConfiguration(), "lib/img/camion.png");
+  return data.entries.map((entry) {
+    var latitudlng = LatLng(entry.value['lat'], entry.value['lng']);
+    return Marker(
+      markerId: MarkerId(entry.key),
+      position: latitudlng,
+      infoWindow: InfoWindow(title: entry.key),
+      icon: markerIcon,
+    );
+  }).toSet();
+}
+
 class _MyAppState extends State<MainScreen> {
   String? _mapStyle;
   GoogleMapController? mapController;
   Set<Marker> _markers = {};
+  Set<Polyline> _polylines = {};
 
   @override
   void initState() {
@@ -166,7 +289,7 @@ class _MyAppState extends State<MainScreen> {
   }
 
   Future<Set<Marker>> _getMarkers() async {
-    var url = Uri.parse("https://api-dev-jqhg.2.us-1.fl0.io/obtener_ubicacion");
+    var url = Uri.parse("https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/obtener_ubicacion");
     var headers = {
       "Authorization": "Basic " +
           base64Encode(utf8.encode(
@@ -177,9 +300,8 @@ class _MyAppState extends State<MainScreen> {
 
     BitmapDescriptor markerIcon = await BitmapDescriptor.fromAssetImage(
         ImageConfiguration(), 'lib/img/camion.png');
-
     return (localizaciones as Map<String, dynamic>).entries.map((entry) {
-      var latitudLng = LatLng(entry.value['lat'], entry.value['lng']);
+      var latitudLng = LatLng(entry.value['localizacion']['lat'] ?? 0.0, entry.value['localizacion']['lng'] ?? 0);
       return Marker(
         markerId: MarkerId(entry.key),
         position: latitudLng,
@@ -213,6 +335,19 @@ class _MyAppState extends State<MainScreen> {
     );
 
     timer = Timer.periodic(Duration(seconds: 1), (Timer t) => _getMarkers());
+  }
+
+  Polyline _crearRuta() {
+    var rutaPuntos = <LatLng>[
+
+    ];
+
+    return Polyline(
+        polylineId: PolylineId('101 - Ebanos'),
+        visible: true,
+        points: rutaPuntos,
+        color: Colors.blue,
+    );
   }
 
   Stream<Set<Marker>> _getMarkersStream() async* {
@@ -250,6 +385,7 @@ class _MyAppState extends State<MainScreen> {
                 target: rastreo,
                 zoom: 15,
               ),
+              polylines: _polylines,
               markers: Provider.of<MarkerProvider>(context).markers,
             ),
             Padding(
@@ -289,7 +425,11 @@ class _MyAppState extends State<MainScreen> {
                           )
                         ],
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => MyButton()),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                         padding:
