@@ -14,6 +14,15 @@ class MarkerProvider with ChangeNotifier {
   Set<Marker> _markers = {};
   Set<Marker> get markers => _markers;
 
+  String? _filtroaplicado;
+
+  String? get filtroaplicado => _filtroaplicado;
+
+  set filtroaplicado(String? valor) {
+    _filtroaplicado = valor;
+    notifyListeners();
+  }
+
   void updateMarkers(Set<Marker> newMarkers) {
     _markers = newMarkers;
     notifyListeners();
@@ -33,7 +42,8 @@ void enviarLocalizacion(Position position) async {
   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
   String Iddevice = androidInfo.androidId;
 
-  var url = Uri.parse('https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/update_ubicacion');
+  var url = Uri.parse(
+      'https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/update_ubicacion');
   var headers = {
     "Content-type": "application/json",
     "Authorization": "Basic " +
@@ -44,54 +54,18 @@ void enviarLocalizacion(Position position) async {
     'id_usuario': Iddevice,
     'Camion': '101 - Ebanos',
     'Ruta': [
-      {
-        "lat": 25.7969811,
-        "lng": -100.25335319999999
-      },
-      {
-        "lat": 25.796800899999997,
-        "lng": -100.2530536
-      },
-      {
-        "lat": 25.7969811,
-        "lng": -100.25335319999999
-      },
-      {
-        "lat": 25.784658399999998,
-        "lng": -100.2540162
-      },
-      {
-        "lat": 25.784972,
-        "lng": -100.2664976
-      },
-      {
-        "lat": 25.7710959,
-        "lng": -100.2653776
-      },
-      {
-        "lat": 25.7676545,
-        "lng": -100.2919534
-      },
-      {
-        "lat": 25.7238853,
-        "lng": -100.31255279999999
-      },
-      {
-        "lat": 25.757854899999998,
-        "lng": -100.2960626
-      },
-      {
-        "lat": 25.7615654,
-        "lng": -100.28786579999999
-      },
-      {
-        "lat": 25.783837,
-        "lng": -100.2486119
-      },
-      {
-        "lat": 25.796800899999997,
-        "lng": -100.2530536
-      },
+      {"lat": 25.7969811, "lng": -100.25335319999999},
+      {"lat": 25.796800899999997, "lng": -100.2530536},
+      {"lat": 25.7969811, "lng": -100.25335319999999},
+      {"lat": 25.784658399999998, "lng": -100.2540162},
+      {"lat": 25.784972, "lng": -100.2664976},
+      {"lat": 25.7710959, "lng": -100.2653776},
+      {"lat": 25.7676545, "lng": -100.2919534},
+      {"lat": 25.7238853, "lng": -100.31255279999999},
+      {"lat": 25.757854899999998, "lng": -100.2960626},
+      {"lat": 25.7615654, "lng": -100.28786579999999},
+      {"lat": 25.783837, "lng": -100.2486119},
+      {"lat": 25.796800899999997, "lng": -100.2530536},
     ],
     'localizacion': {'lat': position.latitude, 'lng': position.longitude}
   });
@@ -116,7 +90,8 @@ void borrarubicacion() async {
   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
   String Iddevice = androidInfo.androidId;
 
-  var url = Uri.parse('https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/quitar_ubicacion');
+  var url = Uri.parse(
+      'https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/quitar_ubicacion');
   var headers = {
     "Content-type": "application/json",
     "Authorization": "Basic " +
@@ -203,68 +178,219 @@ class MyButton extends StatefulWidget {
 
 class _MyButtonState extends State<MyButton> {
   String filter = '';
+  final _controller = TextEditingController();
+  var TodoslosCamiones = ['101 - Ebanos', '213 - Capellania'];
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 130,
-      width: double.infinity,
-      alignment: Alignment.bottomCenter,
-      child: ElevatedButton(
-        child: Text("Filtar"),
-        onPressed: () {
-          showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: Text('Introduce el camion'),
-                  content: TextField(
-                    onChanged: (value) {
-                      setState(() {
-                        filter = value;
-                      });
-                    },
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(color: Color.fromRGBO(255, 207, 164, 1)),
+          height: 140,
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              children: [
+                SizedBox(height: 51),
+                Container(
+                  height: 51,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(50),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 5,
+                                blurRadius: 7,
+                                offset: Offset(0, 3)),
+                          ]),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Autocomplete<String>(
+                                optionsBuilder:
+                                    (TextEditingValue textEditingValue) {
+                                  if (textEditingValue.text == '') {
+                                    return const Iterable<String>.empty();
+                                  }
+                                  return TodoslosCamiones.where(
+                                      (String option) {
+                                    return option.contains(
+                                        textEditingValue.text.toLowerCase());
+                                  });
+                                },
+                                fieldViewBuilder: (BuildContext context,
+                                    TextEditingController controladorTexto,
+                                    FocusNode nodoEnfoque,
+                                    VoidCallback alEnviarCampo) {
+                                  return TextFormField(
+                                      controller: controladorTexto,
+                                      decoration: InputDecoration(
+                                        floatingLabelBehavior: FloatingLabelBehavior.never,
+                                        border: InputBorder.none,
+                                        contentPadding: EdgeInsets.fromLTRB(0, 12, 0, 12),
+                                        labelText: controladorTexto.text
+                                                .trim()
+                                                .isNotEmpty
+                                            ? null
+                                            : "Filtrar por camion",
+                                        hintText: (nodoEnfoque.hasFocus &&
+                                                controladorTexto.text
+                                                    .trim()
+                                                    .isEmpty)
+                                            ?"Escribir nombre del camion. "
+                                            : (nodoEnfoque.hasFocus == false &&
+                                                    controladorTexto.text
+                                                        .trim()
+                                                        .isEmpty)
+                                                ? "Escribir nombre del camion. "
+                                                : null,
+                                      ),
+                                      focusNode: nodoEnfoque,
+                                      onChanged: (String texto) {
+                                        setState(() {
+                                          controladorTexto.text = texto;
+                                        });
+                                      },
+                                      onFieldSubmitted: (String seleccion) {
+                                        alEnviarCampo();
+                                        print("El valor ingresado es $seleccion");
+                                      },
+                                    );
+                                },
+                                onSelected: (String value) async {
+                                  _controller.text = value;
+                                },
+                              ),
+                            ),
+                            IconButton(
+                                icon: Icon(Icons.search),
+                                onPressed: () async {
+                                  String camion = _controller.text;
+
+                                  if (camion.isEmpty) {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: Text('Campo vacio'),
+                                            content: Text(
+                                                'Por favor, ingresa un valor valido.  '),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: Text('Ok'),
+                                              ),
+                                            ],
+                                          );
+                                        });
+                                  }
+
+                                  print('Has ingresado: $camion');
+
+                                  var url = Uri.parse(
+                                      "https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/obtener_ubicacion/$camion");
+                                  var headers = {
+                                    "Authorization": "Basic " +
+                                        base64Encode(utf8.encode(
+                                            "apprastreoadministracionproyectorealizado:PASSCODEFIMERASTREO14")),
+                                  };
+                                  var response =
+                                      await http.get(url, headers: headers);
+                                  var localizaciones =
+                                      jsonDecode(response.body);
+
+                                  Provider.of<MarkerProvider>(context,
+                                          listen: false)
+                                      .filtroaplicado = camion;
+                                  Navigator.of(context).pop();
+
+                                  if (localizaciones.isEmpty) {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            title: Text(
+                                                'No se encontraron camiones'),
+                                            content: Text(
+                                                'No se encontraron camiones con el nombre: $camion'),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('Ok'))
+                                            ],
+                                          );
+                                        });
+                                  }
+                                }),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                  actions: <Widget>[
-                    TextButton(
-                      child: Text("Ok"),
-                      onPressed: () async {
-                        Navigator.of(context).pop();
-                        Set<Marker> markers = await _getFilteredData(context, filter);
-                        Provider.of<MarkerProvider>(context, listen: false).updateMarkers(markers);
-                        print("Filtrado por: $filter");
-                      }
-                    )
-                  ],
-                );
-              },
-          );
-        }
-      ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(255, 226, 200, 1),
+            ),
+            width: double.infinity,
+            alignment: Alignment.bottomCenter,
+            child: ElevatedButton(
+                child: Text("Filtar"),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('Introduce el camion'),
+                        content: TextField(
+                          onChanged: (value) {
+                            setState(() {
+                              filter = value;
+                            });
+                          },
+                        ),
+                        actions: <Widget>[
+                          TextButton(child: Text("Ok"), onPressed: () {})
+                        ],
+                      );
+                    },
+                  );
+                }),
+          ),
+        ),
+      ],
     );
   }
 }
 
-Future<Set<Marker>> _getFilteredData(BuildContext context, String camion) async {
-  var url = Uri.parse("https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/obtener_ubicacion/$camion");
-  var headers = {
-    "Authorization": "Basic " + base64Encode(utf8.encode("apprastreoadministracionproyectorealizado:PASSCODEFIMERASTREO14")),
-  };
-  var response = await http.get(url, headers: headers);
-  var localizaciones = jsonDecode(response.body);
-
-  return _createMarkersFromdata(localizaciones);
-}
-
 Future<Set<Marker>> _createMarkersFromdata(Map<String, dynamic> data) async {
-  final markerIcon = await BitmapDescriptor.fromAssetImage(ImageConfiguration(), "lib/img/camion.png");
+  final markerIcon = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(), "lib/img/camion.png");
   return data.entries.map((entry) {
-    var latitudlng = LatLng(entry.value['lat'], entry.value['lng']);
+    var latitudlng = LatLng(
+        entry.value['localizacion']['lat'], entry.value['localizacion']['lng']);
     return Marker(
       markerId: MarkerId(entry.key),
       position: latitudlng,
       infoWindow: InfoWindow(title: entry.key),
-      icon: markerIcon,
+      icon: BitmapDescriptor.defaultMarker,
     );
   }).toSet();
 }
@@ -289,19 +415,29 @@ class _MyAppState extends State<MainScreen> {
   }
 
   Future<Set<Marker>> _getMarkers() async {
-    var url = Uri.parse("https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/obtener_ubicacion");
+    String url;
+    String? filtroaplicado =
+        Provider.of<MarkerProvider>(context, listen: false).filtroaplicado;
+    if (filtroaplicado == null) {
+      url =
+          "https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/obtener_ubicacion";
+    } else {
+      url =
+          "https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/obtener_ubicacion/$filtroaplicado";
+    }
     var headers = {
       "Authorization": "Basic " +
           base64Encode(utf8.encode(
               "apprastreoadministracionproyectorealizado:PASSCODEFIMERASTREO14")),
     };
-    var response = await http.get(url, headers: headers);
+    var response = await http.get(Uri.parse(url), headers: headers);
     var localizaciones = jsonDecode(response.body);
 
     BitmapDescriptor markerIcon = await BitmapDescriptor.fromAssetImage(
         ImageConfiguration(), 'lib/img/camion.png');
     return (localizaciones as Map<String, dynamic>).entries.map((entry) {
-      var latitudLng = LatLng(entry.value['localizacion']['lat'] ?? 0.0, entry.value['localizacion']['lng'] ?? 0);
+      var latitudLng = LatLng(entry.value['localizacion']['lat'] ?? 0.0,
+          entry.value['localizacion']['lng'] ?? 0);
       return Marker(
         markerId: MarkerId(entry.key),
         position: latitudLng,
@@ -338,15 +474,13 @@ class _MyAppState extends State<MainScreen> {
   }
 
   Polyline _crearRuta() {
-    var rutaPuntos = <LatLng>[
-
-    ];
+    var rutaPuntos = <LatLng>[];
 
     return Polyline(
-        polylineId: PolylineId('101 - Ebanos'),
-        visible: true,
-        points: rutaPuntos,
-        color: Colors.blue,
+      polylineId: PolylineId('101 - Ebanos'),
+      visible: true,
+      points: rutaPuntos,
+      color: Colors.blue,
     );
   }
 
@@ -388,41 +522,37 @@ class _MyAppState extends State<MainScreen> {
               polylines: _polylines,
               markers: Provider.of<MarkerProvider>(context).markers,
             ),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
+            Container(
+              padding: const EdgeInsets.fromLTRB(17, 10, 17, 10),
               child: Center(
                 child: Column(
                   children: [
-                    SizedBox(height: 49.0),
-                    SizedBox(height: 17),
+                    SizedBox(height: 40.0),
+                    SizedBox(height: 7),
                     ElevatedButton(
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Icon(
                                 Icons.search,
                                 color: Colors.white70,
                                 size: 40,
                               ),
+                              SizedBox(width: 21),
                               Text(
                                 '¿A donde quieres ir?',
                                 style: TextStyle(
-                                    fontSize: 19, color: Colors.white70),
+                                    fontSize: 19, color: Colors.white54),
                               ),
                             ],
                           ),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.keyboard_arrow_up,
-                                color: Colors.white70,
-                                size: 40,
-                              ),
-                            ],
-                          )
+                          Spacer(),
+                          Icon(
+                            Icons.keyboard_arrow_up,
+                            color: Colors.white70,
+                            size: 40,
+                          ),
                         ],
                       ),
                       onPressed: () {
@@ -432,8 +562,7 @@ class _MyAppState extends State<MainScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 49, vertical: 11),
+                        padding: EdgeInsets.fromLTRB(17, 11, 17, 11),
                       ),
                     ),
                   ],
@@ -456,8 +585,8 @@ class _MyAppState extends State<MainScreen> {
                                 width: 50,
                                 child: FloatingActionButton(
                                   child: Icon(
-                                      Icons.add,
-                                      color: Colors.blueGrey,
+                                    Icons.add,
+                                    color: Colors.blueGrey,
                                   ),
                                   onPressed: () {
                                     mapController?.animateCamera(
@@ -466,27 +595,27 @@ class _MyAppState extends State<MainScreen> {
                                   },
                                   backgroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.vertical(top: Radius.circular(100))
-                                  ),
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(100))),
                                 ),
                               ),
                               Container(
                                 height: 50,
                                 width: 50,
                                 child: FloatingActionButton(
-                                    child: Icon(
-                                        Icons.remove,
-                                        color: Colors.blueGrey,
-                                    ),
-                                    onPressed: () {
-                                      mapController?.animateCamera(
-                                        CameraUpdate.zoomOut(),
-                                      );
-                                    },
+                                  child: Icon(
+                                    Icons.remove,
+                                    color: Colors.blueGrey,
+                                  ),
+                                  onPressed: () {
+                                    mapController?.animateCamera(
+                                      CameraUpdate.zoomOut(),
+                                    );
+                                  },
                                   backgroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(100))
-                                  ),
+                                      borderRadius: BorderRadius.vertical(
+                                          bottom: Radius.circular(100))),
                                 ),
                               ),
                             ],
@@ -495,8 +624,7 @@ class _MyAppState extends State<MainScreen> {
                   ),
                 ),
                 Padding(
-                  padding:
-                      const EdgeInsets.fromLTRB(10, 25, 10, 100),
+                  padding: const EdgeInsets.fromLTRB(10, 25, 10, 100),
                   child: Align(
                     alignment: Alignment.bottomRight,
                     child: ElevatedButton(
