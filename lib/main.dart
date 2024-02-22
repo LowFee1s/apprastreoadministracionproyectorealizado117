@@ -176,207 +176,253 @@ class MyButton extends StatefulWidget {
   _MyButtonState createState() => _MyButtonState();
 }
 
+Future<List<String>> getCamiones() async {
+  final url = Uri.parse(
+      "https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/camiones");
+  final headers = {
+    "Authorization": "Basic " +
+        base64Encode(utf8.encode(
+            "apprastreoadministracionproyectorealizado:PASSCODEFIMERASTREO14")),
+  };
+
+  var response = await http.get(url, headers: headers);
+
+  var camiones = jsonDecode(response.body).cast<String>();
+
+  return camiones;
+}
+
 class _MyButtonState extends State<MyButton> {
   String filter = '';
   final _controller = TextEditingController();
-  var TodoslosCamiones = ['101 - Ebanos', '213 - Capellania'];
+  var TodoslosCamiones;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          decoration: BoxDecoration(color: Color.fromRGBO(255, 207, 164, 1)),
-          height: 140,
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Column(
-              children: [
-                SizedBox(height: 51),
-                Container(
-                  height: 51,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(50),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 5,
-                                blurRadius: 7,
-                                offset: Offset(0, 3)),
-                          ]),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Autocomplete<String>(
-                                optionsBuilder:
-                                    (TextEditingValue textEditingValue) {
-                                  if (textEditingValue.text == '') {
-                                    return const Iterable<String>.empty();
-                                  }
-                                  return TodoslosCamiones.where(
-                                      (String option) {
-                                    return option.contains(
-                                        textEditingValue.text.toLowerCase());
-                                  });
-                                },
-                                fieldViewBuilder: (BuildContext context,
-                                    TextEditingController controladorTexto,
-                                    FocusNode nodoEnfoque,
-                                    VoidCallback alEnviarCampo) {
-                                  return TextFormField(
-                                      controller: controladorTexto,
-                                      decoration: InputDecoration(
-                                        floatingLabelBehavior: FloatingLabelBehavior.never,
-                                        border: InputBorder.none,
-                                        contentPadding: EdgeInsets.fromLTRB(0, 12, 0, 12),
-                                        labelText: controladorTexto.text
-                                                .trim()
-                                                .isNotEmpty
-                                            ? null
-                                            : "Filtrar por camion",
-                                        hintText: (nodoEnfoque.hasFocus &&
-                                                controladorTexto.text
-                                                    .trim()
-                                                    .isEmpty)
-                                            ?"Escribir nombre del camion. "
-                                            : (nodoEnfoque.hasFocus == false &&
-                                                    controladorTexto.text
-                                                        .trim()
-                                                        .isEmpty)
-                                                ? "Escribir nombre del camion. "
-                                                : null,
-                                      ),
-                                      focusNode: nodoEnfoque,
-                                      onChanged: (String texto) {
-                                        setState(() {
-                                          controladorTexto.text = texto;
-                                        });
-                                      },
-                                      onFieldSubmitted: (String seleccion) {
-                                        alEnviarCampo();
-                                        print("El valor ingresado es $seleccion");
-                                      },
-                                    );
-                                },
-                                onSelected: (String value) async {
-                                  _controller.text = value;
-                                },
+    return FutureBuilder<List<String>>(
+        future: getCamiones(),
+        builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            TodoslosCamiones = snapshot.data;
+          } else if (snapshot.hasError) {
+            return Text("Error: ${snapshot.error}");
+          } else {
+            TodoslosCamiones = snapshot.data;
+          }
+          return Scaffold(
+            backgroundColor: Colors.transparent,
+            body: SafeArea(
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Color.fromRGBO(255, 207, 164, 1),
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(40),
+                              topLeft: Radius.circular(40),
+                            )),
+                        height: 140,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            children: [
+                              SizedBox(height: 15),
+                              Container(
+                                width: 200,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(50)
+                                ),
+                                child: ElevatedButton(
+                                  child: Container(),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                ),
                               ),
-                            ),
-                            IconButton(
-                                icon: Icon(Icons.search),
-                                onPressed: () async {
-                                  String camion = _controller.text;
-
-                                  if (camion.isEmpty) {
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return AlertDialog(
-                                            title: Text('Campo vacio'),
-                                            content: Text(
-                                                'Por favor, ingresa un valor valido.  '),
-                                            actions: <Widget>[
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                                child: Text('Ok'),
-                                              ),
-                                            ],
-                                          );
-                                        });
-                                  }
-
-                                  print('Has ingresado: $camion');
-
-                                  var url = Uri.parse(
-                                      "https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/obtener_ubicacion/$camion");
-                                  var headers = {
-                                    "Authorization": "Basic " +
-                                        base64Encode(utf8.encode(
-                                            "apprastreoadministracionproyectorealizado:PASSCODEFIMERASTREO14")),
-                                  };
-                                  var response =
-                                      await http.get(url, headers: headers);
-                                  var localizaciones =
-                                      jsonDecode(response.body);
-
-                                  Provider.of<MarkerProvider>(context,
-                                          listen: false)
-                                      .filtroaplicado = camion;
-                                  Navigator.of(context).pop();
-
-                                  if (localizaciones.isEmpty) {
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return AlertDialog(
-                                            title: Text(
-                                                'No se encontraron camiones'),
-                                            content: Text(
-                                                'No se encontraron camiones con el nombre: $camion'),
-                                            actions: <Widget>[
-                                              TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
+                              SizedBox(height: 41),
+                              Container(
+                                height: 51,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(50),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: Colors.grey.withOpacity(0.7),
+                                              spreadRadius: 5,
+                                              blurRadius: 7,
+                                              offset: Offset(0, 3)),
+                                        ]),
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Autocomplete<String>(
+                                              optionsBuilder: (TextEditingValue
+                                                  textEditingValue) {
+                                                if (textEditingValue.text == '') {
+                                                  return const Iterable<
+                                                      String>.empty();
+                                                }
+                                                return TodoslosCamiones.where(
+                                                    (String option) {
+                                                  return option.contains(
+                                                      textEditingValue.text
+                                                          .toLowerCase());
+                                                });
+                                              },
+                                              fieldViewBuilder: (BuildContext
+                                                      context,
+                                                  TextEditingController
+                                                      controladorTexto,
+                                                  FocusNode nodoEnfoque,
+                                                  VoidCallback alEnviarCampo) {
+                                                return TextFormField(
+                                                  controller: controladorTexto,
+                                                  decoration: InputDecoration(
+                                                    floatingLabelBehavior:
+                                                        FloatingLabelBehavior
+                                                            .never,
+                                                    border: InputBorder.none,
+                                                    contentPadding:
+                                                        EdgeInsets.fromLTRB(
+                                                            0, 12, 0, 12),
+                                                    labelText: controladorTexto
+                                                            .text
+                                                            .trim()
+                                                            .isNotEmpty
+                                                        ? null
+                                                        : "Filtrar por camion",
+                                                    hintText: (nodoEnfoque
+                                                                .hasFocus &&
+                                                            controladorTexto.text
+                                                                .trim()
+                                                                .isEmpty)
+                                                        ? "Escribir nombre del camion. "
+                                                        : (nodoEnfoque.hasFocus ==
+                                                                    false &&
+                                                                controladorTexto
+                                                                    .text
+                                                                    .trim()
+                                                                    .isEmpty)
+                                                            ? "Escribir nombre del camion. "
+                                                            : null,
+                                                  ),
+                                                  focusNode: nodoEnfoque,
+                                                  onChanged: (String texto) {
+                                                    setState(() {
+                                                      controladorTexto.text =
+                                                          texto;
+                                                    });
                                                   },
-                                                  child: Text('Ok'))
-                                            ],
-                                          );
-                                        });
-                                  }
-                                }),
-                          ],
+                                                  onFieldSubmitted:
+                                                      (String seleccion) {
+                                                    alEnviarCampo();
+                                                    print(
+                                                        "El valor ingresado es $seleccion");
+                                                  },
+                                                );
+                                              },
+                                              onSelected: (String value) async {
+                                                _controller.text = value;
+                                              },
+                                            ),
+                                          ),
+                                          IconButton(
+                                              icon: Icon(Icons.search),
+                                              onPressed: () async {
+                                                String camion = _controller.text;
+
+                                                if (camion.isEmpty) {
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return AlertDialog(
+                                                          title:
+                                                              Text('Campo vacio'),
+                                                          content: Text(
+                                                              'Por favor, ingresa un valor valido.  '),
+                                                          actions: <Widget>[
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              },
+                                                              child: Text('Ok'),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      });
+                                                }
+
+                                                print('Has ingresado: $camion');
+
+                                                var url = Uri.parse(
+                                                    "https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/obtener_ubicacion/$camion");
+                                                var headers = {
+                                                  "Authorization": "Basic " +
+                                                      base64Encode(utf8.encode(
+                                                          "apprastreoadministracionproyectorealizado:PASSCODEFIMERASTREO14")),
+                                                };
+                                                var response = await http.get(url,
+                                                    headers: headers);
+                                                var localizaciones =
+                                                    jsonDecode(response.body);
+
+                                                Provider.of<MarkerProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .filtroaplicado = camion;
+                                                Navigator.of(context).pop();
+
+                                                if (localizaciones.isEmpty) {
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return AlertDialog(
+                                                          title: Text(
+                                                              'No se encontraron camiones'),
+                                                          content: Text(
+                                                              'No se encontraron camiones con el nombre: $camion'),
+                                                          actions: <Widget>[
+                                                            TextButton(
+                                                                onPressed: () {
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .pop();
+                                                                },
+                                                                child: Text('Ok'))
+                                                          ],
+                                                        );
+                                                      });
+                                                }
+                                              }),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
             ),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Color.fromRGBO(255, 226, 200, 1),
-            ),
-            width: double.infinity,
-            alignment: Alignment.bottomCenter,
-            child: ElevatedButton(
-                child: Text("Filtar"),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: Text('Introduce el camion'),
-                        content: TextField(
-                          onChanged: (value) {
-                            setState(() {
-                              filter = value;
-                            });
-                          },
-                        ),
-                        actions: <Widget>[
-                          TextButton(child: Text("Ok"), onPressed: () {})
-                        ],
-                      );
-                    },
-                  );
-                }),
-          ),
-        ),
-      ],
-    );
+          );
+        });
   }
 }
 
@@ -556,9 +602,22 @@ class _MyAppState extends State<MainScreen> {
                         ],
                       ),
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => MyButton()),
-                        );
+                        showModalBottomSheet(
+                          backgroundColor: Colors.transparent,
+                            isScrollControlled: true,
+                            context: context,
+                            builder: (context) {
+                              return Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 100, 0, 0),
+                                child: Container(
+                                    height: MediaQuery.of(context).size.height,
+                                    child: MyButton()
+                                ),
+                              );
+                            });
+                        //Navigator.of(context).push(
+                        //MaterialPageRoute(builder: (context) => MyButton()),
+                        //);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
