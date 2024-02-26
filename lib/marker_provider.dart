@@ -6,8 +6,16 @@ class MarkerProvider with ChangeNotifier {
   Set<Marker> get markers => _markers;
 
   String? _filtroaplicado;
+  bool _filtroChecar = false;
+
+  bool get filtroChecar => _filtroChecar;
 
   String? get filtroaplicado => _filtroaplicado;
+
+  set filtroChecar(bool valor) {
+    _filtroChecar = valor;
+    notifyListeners();
+  }
 
   set filtroaplicado(String? valor) {
     _filtroaplicado = valor;
@@ -18,4 +26,11 @@ class MarkerProvider with ChangeNotifier {
     _markers = newMarkers;
     notifyListeners();
   }
+
+  void quitarFiltro() {
+    _filtroChecar = false;
+    _filtroaplicado = null;
+    notifyListeners();
+  }
+
 }

@@ -14,7 +14,7 @@ void enviarLocalizacion(Position position, _direction) async {
   String Iddevice = androidInfo.androidId;
 
   var url = Uri.parse(
-      'https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/update_ubicacion');
+      'https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/update_ubicacion');
   var headers = {
     "Content-type": "application/json",
     "Authorization": "Basic " +
@@ -70,7 +70,7 @@ void borrarubicacion() async {
   String Iddevice = androidInfo.androidId;
 
   var url = Uri.parse(
-      'https://appserverapirealizado15-dev-zsrt.1.us-1.fl0.io/quitar_ubicacion');
+      'https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/quitar_ubicacion');
   var headers = {
     "Content-type": "application/json",
     "Authorization": "Basic " +
