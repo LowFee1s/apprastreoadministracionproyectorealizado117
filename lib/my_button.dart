@@ -66,7 +66,7 @@ class AutocompleteWidget extends StatelessWidget {
               );
             },
             // Quite el async del onselect
-            onSelected: (String value) {
+            onSelected:  (String value) {
               controller.text = value;
             },
           );
