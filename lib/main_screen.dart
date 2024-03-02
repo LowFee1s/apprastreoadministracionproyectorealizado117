@@ -1,3 +1,4 @@
+import 'package:apprastreoadministracionproyectorealizado/camionscreenrealizado.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -35,7 +36,10 @@ class _MyAppState extends State<MainScreen>
 
   Map<String, double> markerDirecciones = {};
   var TodoslosCamiones;
+  bool botoncamionrealizado = false;
+  List<Map<String, dynamic>> camionesmostrar = [];
   String? camionfiltradorealizado;
+  double _opacidadfiltrar = 1;
 
   Set<Polyline> _polylines = {};
 
@@ -45,7 +49,6 @@ class _MyAppState extends State<MainScreen>
   @override
   void initState() {
     super.initState();
-
     BitmapDescriptor.fromAssetImage(
             ImageConfiguration(), "lib/img/camionatras.png")
         .then((icon) => northMarker = icon);
@@ -68,6 +71,9 @@ class _MyAppState extends State<MainScreen>
     rootBundle.loadString('lib/assets/mapastyle14.json').then((string) {
       _mapStyle = string;
     });
+    cargarCamiones().then((camiones) => setState(() {
+      camionesmostrar = camiones;
+    }));
     iniciarLocalizacion();
     timer = Timer.periodic(Duration(seconds: 1), (Timer t) async {
       Provider.of<MarkerProvider>(context, listen: false)
@@ -201,7 +207,10 @@ class _MyAppState extends State<MainScreen>
 
   @override
   Widget build(BuildContext context) {
-    int? totalcamionesrealizado = Provider.of<MarkerProvider>(context, listen: false).markers.length;
+    MarkerProvider markerProvider = Provider.of<MarkerProvider>(context);
+    bool _botonmostrar = markerProvider.botonmostrar;
+    int? totalcamionesrealizado =
+        Provider.of<MarkerProvider>(context, listen: false).markers.length;
     Marker? deviceMarker1 = _markers.firstWhere(
       (marker) => marker.markerId == MarkerId('device_location'),
     );
@@ -231,300 +240,434 @@ class _MyAppState extends State<MainScreen>
               polylines: _polylines,
               markers: Provider.of<MarkerProvider>(context).markers,
             ),
-            Consumer<MarkerProvider>(builder: (context, markerProvider, child) {
-              if (markerProvider.filtroChecar) {
-                return Stack(
-                    alignment: AlignmentDirectional.bottomCenter,
+            Container(
+              child: markerProvider.filtroChecar == null
+                  ? Center(child: CircularProgressIndicator())
+                  : markerProvider.filtroChecar
+                      ? Stack(
+                          alignment: AlignmentDirectional.bottomCenter,
+                          children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(15, 49, 0, 0),
+                                child: Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Container(
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        shape: CircleBorder(),
+                                        padding: EdgeInsets.all(21.0),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                      child: Icon(
+                                        Icons.arrow_back,
+                                        color: Colors.white70,
+                                        size: 31,
+                                      ),
+                                      onPressed: () {
+                                        markerProvider.quitarFiltro();
+                                        setState(() {
+                                          _opacidadfiltrar =
+                                              _opacidadfiltrar == 1 ? 1 : 1;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(15, 0, 15, 31),
+                                child: Container(
+                                  alignment: Alignment.bottomCenter,
+                                  height:
+                                      MediaQuery.of(context).size.height / 4.5,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(40),
+                                          bottom: Radius.circular(40)),
+                                      color: Colors.orange),
+                                  child: Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            0, 15, 0, 0),
+                                        child: Container(
+                                          height: 5,
+                                          width: 140,
+                                          decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(50)),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            31, 21, 10, 10),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              height: 31,
+                                              width: 51,
+                                              decoration: BoxDecoration(
+                                                color: Colors.green,
+                                                borderRadius:
+                                                    BorderRadius.vertical(
+                                                        top: Radius.circular(9),
+                                                        bottom:
+                                                            Radius.circular(9)),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                    camionfiltradorealizado!
+                                                        .substring(0, 3),
+                                                    style: TextStyle(
+                                                      fontSize: 17,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                    )),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      7, 0, 0, 4),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.directions_bus,
+                                                    color: Colors.white,
+                                                    size: 23,
+                                                  ),
+                                                  Padding(
+                                                    padding: const EdgeInsets
+                                                        .fromLTRB(17, 0, 0, 0),
+                                                    child: Text(
+                                                      camionfiltradorealizado!
+                                                          .substring(6),
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                          fontSize: 18,
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w800),
+                                                    ),
+                                                  ),
+                                                  Padding(
+                                                    padding: const EdgeInsets
+                                                        .fromLTRB(41, 0, 0, 0),
+                                                    child: Icon(
+                                                      Icons.arrow_forward,
+                                                      color: Colors.white,
+                                                      size: 23,
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    width: 35,
+                                                    alignment:
+                                                        Alignment.centerRight,
+                                                    child: Text(
+                                                        totalcamionesrealizado
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w800)),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ])
+                      : Container(
+                          padding: const EdgeInsets.fromLTRB(17, 10, 17, 10),
+                          child: Center(
+                            child: Column(
+                              children: [
+                                SizedBox(height: 40.0),
+                                SizedBox(height: 7),
+                                Stack(children: [
+                                  AnimatedOpacity(
+                                    opacity:
+                                        markerProvider.filtroChecar ? 0 : 1,
+                                    duration: Duration(seconds: 10),
+                                    child: ElevatedButton(
+                                      child: Row(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.search,
+                                                color: Colors.white70,
+                                                size: 40,
+                                              ),
+                                              SizedBox(width: 21),
+                                              Text(
+                                                '¿A donde quieres ir?',
+                                                style: TextStyle(
+                                                    fontSize: 19,
+                                                    color: Colors.white54),
+                                              ),
+                                            ],
+                                          ),
+                                          Spacer(),
+                                          Icon(
+                                            Icons.keyboard_arrow_up,
+                                            color: Colors.white70,
+                                            size: 40,
+                                          ),
+                                        ],
+                                      ),
+                                      onPressed: () {
+                                        getCamiones()
+                                            .then((camiones) => setState(() {
+                                                  TodoslosCamiones = camiones;
+                                                }));
+                                        showModalBottomSheet(
+                                            backgroundColor: Colors.transparent,
+                                            isScrollControlled: true,
+                                            context: context,
+                                            builder: (context) {
+                                              return Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        0, 100, 0, 0),
+                                                child: Container(
+                                                    height:
+                                                        MediaQuery.of(context)
+                                                            .size
+                                                            .height,
+                                                    child: MyButton(
+                                                        TodoslosCamiones:
+                                                            TodoslosCamiones)),
+                                              );
+                                            });
+                                        //Navigator.of(context).push(
+                                        //MaterialPageRoute(builder: (context) => MyButton()),
+                                        //);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.orange,
+                                        padding:
+                                            EdgeInsets.fromLTRB(17, 11, 17, 11),
+                                      ),
+                                    ),
+                                  ),
+                                ]),
+                              ],
+                            ),
+                          ),
+                        ),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 35),
+                child: Container(
+                  height: 57,
+                  width: 311,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(40)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(15, 49, 0, 0),
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: Container(
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                shape: CircleBorder(),
-                                padding: EdgeInsets.all(21.0),
-                                backgroundColor: Colors.orange,
-                              ),
-                              child: Icon(
-                                Icons.arrow_back,
-                                color: Colors.white70,
-                                size: 31,
-                              ),
-                              onPressed: () {
-                                markerProvider.quitarFiltro();
-                              },
+                      Container(
+                        width: 157,
+                        height: 51,
+                        decoration: BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius: BorderRadius.circular(40)),
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ButtonStyle(
+                            elevation: MaterialStatePropertyAll(0),
+                              backgroundColor: _botonmostrar ?
+                                  MaterialStatePropertyAll(Colors.white) : MaterialStatePropertyAll(Colors.orange)),
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.near_me_outlined,
+                                  color: _botonmostrar ? Colors.grey : Colors.white,
+                                ),
+                                Text(_botonmostrar ? "" : "Cerca de ti",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 17,
+                                        color: Colors.white)),
+                              ],
                             ),
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(15, 0, 15, 40),
-                        child: Container(
-                          alignment: Alignment.bottomCenter,
-                          height: MediaQuery.of(context).size.height / 6 + 10,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(40),
-                                  bottom: Radius.circular(40)),
-                              color: Colors.orange),
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                                child: Container(
-                                  height: 5,
-                                  width: 140,
-                                  decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(50)),
+                      Container(
+                        width: 140,
+                        height: 51,
+                        decoration: BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius: BorderRadius.circular(40)),
+                        child: ElevatedButton(
+                          onPressed: botoncamionrealizado ? null : () {
+                           setState(() {
+                             botoncamionrealizado = true;
+                           });
+                           Provider.of<MarkerProvider>(context, listen: false).botonmostrar = true;
+                            final controllermodal = showCupertinoModalPopup(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Padding(
+                                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                    child: Container(
+                                      height: MediaQuery.of(context).size.height,
+                                      child: camionscreenrealizado(camionesmostrar: camionesmostrar),
+                                    ),
+                                  );
+                            });
+                            controllermodal.then((_) {
+                              Provider.of<MarkerProvider>(context, listen: false).botonmostrar = false;
+                              setState(() {
+                                botoncamionrealizado = false;
+                              });
+                            });
+                          },
+                          style: ButtonStyle(
+                            elevation: MaterialStatePropertyAll(0),
+                              backgroundColor: _botonmostrar ?
+                                  MaterialStatePropertyAll(Colors.orange) : MaterialStatePropertyAll(Colors.white)),
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.polyline_outlined,
+                                  color: _botonmostrar ? Colors.white : Colors.grey,
                                 ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                                child: Text("Filtrando por camion: ",
+                                Text(_botonmostrar ? "Rutas" : "",
                                     style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 21,
-                                    )),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(31, 11, 10, 10),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      height: 39,
-                                      width: 61,
-                                      decoration: BoxDecoration(
-                                        color: Colors.green,
-                                        borderRadius: BorderRadius.vertical(
-                                            top: Radius.circular(9),
-                                            bottom: Radius.circular(9)),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                            camionfiltradorealizado!
-                                                .substring(0, 3),
-                                            style: TextStyle(
-                                              fontSize: 17,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w800,
-                                            )),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.fromLTRB(7, 0, 0, 4),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.directions_bus,
-                                            color: Colors.white,
-                                            size: 30,
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                17, 0, 0, 0),
-                                            child: Text(
-                                              camionfiltradorealizado!
-                                                  .substring(6),
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  fontSize: 18,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w800),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                41, 0, 0, 0),
-                                            child: Icon(
-                                              Icons.arrow_forward,
-                                              color: Colors.white,
-                                              size: 30,
-                                            ),
-                                          ),
-                                          Container(
-                                            width: 35,
-                                            alignment: Alignment.centerRight,
-                                            child: Text(totalcamionesrealizado.toString(), style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w800
-                                            )),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            ],
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 17,
+                                        color: Colors.white)),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ]);
-              } else {
-                return Container(
-                  padding: const EdgeInsets.fromLTRB(17, 10, 17, 10),
-                  child: Center(
-                    child: Column(
-                      children: [
-                        SizedBox(height: 40.0),
-                        SizedBox(height: 7),
-                        ElevatedButton(
-                          child: Row(
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.search,
-                                    color: Colors.white70,
-                                    size: 40,
-                                  ),
-                                  SizedBox(width: 21),
-                                  Text(
-                                    '¿A donde quieres ir?',
-                                    style: TextStyle(
-                                        fontSize: 19, color: Colors.white54),
-                                  ),
-                                ],
-                              ),
-                              Spacer(),
-                              Icon(
-                                Icons.keyboard_arrow_up,
-                                color: Colors.white70,
-                                size: 40,
-                              ),
-                            ],
-                          ),
-                          onPressed: () {
-                            getCamiones().then((camiones) => setState(() {
-                                  TodoslosCamiones = camiones;
-                                }));
-                            showModalBottomSheet(
-                                backgroundColor: Colors.transparent,
-                                isScrollControlled: true,
-                                context: context,
-                                builder: (context) {
-                                  return Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(0, 100, 0, 0),
-                                    child: Container(
-                                        height:
-                                            MediaQuery.of(context).size.height,
-                                        child: MyButton(
-                                            TodoslosCamiones:
-                                                TodoslosCamiones)),
-                                  );
-                                });
-                            //Navigator.of(context).push(
-                            //MaterialPageRoute(builder: (context) => MyButton()),
-                            //);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            padding: EdgeInsets.fromLTRB(17, 11, 17, 11),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-            }),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 17, 0),
-                  child: Column(
-                    children: [
-                      Align(
-                          alignment: Alignment.bottomRight,
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 50,
-                                width: 50,
-                                child: FloatingActionButton(
-                                  child: Icon(
-                                    Icons.add,
-                                    color: Colors.blueGrey,
-                                  ),
-                                  onPressed: () {
-                                    mapController?.animateCamera(
-                                      CameraUpdate.zoomIn(),
-                                    );
-                                  },
-                                  backgroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(100))),
-                                ),
-                              ),
-                              Container(
-                                height: 50,
-                                width: 50,
-                                child: FloatingActionButton(
-                                  child: Icon(
-                                    Icons.remove,
-                                    color: Colors.blueGrey,
-                                  ),
-                                  onPressed: () {
-                                    mapController?.animateCamera(
-                                      CameraUpdate.zoomOut(),
-                                    );
-                                  },
-                                  backgroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.vertical(
-                                          bottom: Radius.circular(100))),
-                                ),
-                              ),
-                            ],
-                          )),
+
                     ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 25, 10, 100),
-                  child: Align(
-                    alignment: Alignment.bottomRight,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          shape: CircleBorder(),
-                          padding: EdgeInsets.all(10),
-                          backgroundColor: Colors.orange),
-                      child: Icon(
-                        Icons.my_location_rounded,
-                        color: Colors.white70,
-                        size: 49,
-                      ),
-                      onPressed: () {
-                        if (mapController != null && _markers.isNotEmpty) {
-                          Marker? deviceMarker = _markers.firstWhere((marker) =>
-                              marker.markerId == MarkerId('device_location'));
-                          if (deviceMarker != null) {
-                            mapController!.animateCamera(
-                              CameraUpdate.newCameraPosition(
-                                CameraPosition(
-                                  target: deviceMarker.position,
-                                  zoom: 15,
-                                ),
-                              ),
-                            );
-                          }
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
+            Stack(children: [
+              AnimatedPositioned(
+                right: 0,
+                bottom: markerProvider.filtroChecar ? 150 : 0,
+                duration: Duration(seconds: 1),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(17, 0, 17, 0),
+                      child: Column(
+                        children: [
+                          Align(
+                              alignment: Alignment.bottomRight,
+                              child: Column(
+                                children: [
+                                  Container(
+                                    height: 50,
+                                    width: 50,
+                                    child: FloatingActionButton(
+                                      child: Icon(
+                                        Icons.add,
+                                        color: Colors.blueGrey,
+                                      ),
+                                      onPressed: () {
+                                        mapController?.animateCamera(
+                                          CameraUpdate.zoomIn(),
+                                        );
+                                      },
+                                      backgroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.vertical(
+                                              top: Radius.circular(100))),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 50,
+                                    width: 50,
+                                    child: FloatingActionButton(
+                                      child: Icon(
+                                        Icons.remove,
+                                        color: Colors.blueGrey,
+                                      ),
+                                      onPressed: () {
+                                        mapController?.animateCamera(
+                                          CameraUpdate.zoomOut(),
+                                        );
+                                      },
+                                      backgroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.vertical(
+                                              bottom: Radius.circular(100))),
+                                    ),
+                                  ),
+                                ],
+                              )),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 25, 10, 100),
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              shape: CircleBorder(),
+                              padding: EdgeInsets.all(10),
+                              backgroundColor: Colors.orange),
+                          child: Icon(
+                            Icons.my_location_rounded,
+                            color: Colors.white70,
+                            size: 49,
+                          ),
+                          onPressed: () {
+                            if (mapController != null && _markers.isNotEmpty) {
+                              Marker? deviceMarker = _markers.firstWhere(
+                                  (marker) =>
+                                      marker.markerId ==
+                                      MarkerId('device_location'));
+                              if (deviceMarker != null) {
+                                mapController!.animateCamera(
+                                  CameraUpdate.newCameraPosition(
+                                    CameraPosition(
+                                      target: deviceMarker.position,
+                                      zoom: 15,
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ]),
             StreamBuilder<Set<Marker>>(
               stream: _getMarkersStream(),
               builder: (context, snapshot) {

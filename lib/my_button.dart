@@ -76,10 +76,15 @@ class AutocompleteWidget extends StatelessWidget {
 
 class _MyButtonState extends State<MyButton> {
   String filter = '';
+  bool _estacargando = false;
   final _controller = TextEditingController();
 
   Future<void> handleSearch() async {
     String camion = _controller.text;
+
+    setState(() {
+      _estacargando = true;
+    });
 
     if (camion.isEmpty) {
       showDialog(
@@ -92,6 +97,9 @@ class _MyButtonState extends State<MyButton> {
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
+                    setState(() {
+                      _estacargando = false;
+                    });
                   },
                   child: Text('Ok'),
                 ),
@@ -130,12 +138,18 @@ class _MyButtonState extends State<MyButton> {
                 TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
+                      setState(() {
+                        _estacargando = false;
+                      });
                     },
                     child: Text('Ok'))
               ],
             );
           });
     }
+    setState(() {
+      _estacargando = false;
+    });
   }
 
   @override
@@ -205,8 +219,9 @@ class _MyButtonState extends State<MyButton> {
                                             todoslosCamionesNotifier),
                                   ),
                                   IconButton(
-                                      icon: Icon(Icons.search),
-                                      onPressed: handleSearch),
+                                      icon: _estacargando ? CircularProgressIndicator() : Icon(Icons.search),
+                                      onPressed: _estacargando ? null : handleSearch
+                                  ),
                                 ],
                               ),
                             ),
