@@ -24,7 +24,7 @@ void enviarLocalizacion(Position position, _direction) async {
 
   var body = jsonEncode({
     'id_usuario': Iddevice,
-    'Camion': '101 - Ebanos',
+    'Camion': '001 - Transmetro Olivas',
     'Ruta': [
       {"lat": 25.7969811, "lng": -100.25335319999999},
       {"lat": 25.796800899999997, "lng": -100.2530536},
@@ -40,6 +40,7 @@ void enviarLocalizacion(Position position, _direction) async {
       {"lat": 25.796800899999997, "lng": -100.2530536},
     ],
     'Direccion': _direction,
+    'Tipo': 'Transmetro',
     'localizacion': {'lat': position.latitude, 'lng': position.longitude}
   });
 

@@ -39,6 +39,7 @@ class _MyAppState extends State<MainScreen>
   bool botoncamionrealizado = false;
   List<Map<String, dynamic>> camionesmostrar = [];
   String? camionfiltradorealizado;
+  String? camionfiltradotiporealizado;
   double _opacidadfiltrar = 1;
 
   Set<Polyline> _polylines = {};
@@ -71,9 +72,11 @@ class _MyAppState extends State<MainScreen>
     rootBundle.loadString('lib/assets/mapastyle14.json').then((string) {
       _mapStyle = string;
     });
-    cargarCamiones().then((camiones) => setState(() {
-      camionesmostrar = camiones;
-    }));
+    timer = Timer.periodic(Duration(seconds: 1), (Timer t) {
+      cargarCamiones().then((camiones) => setState(() {
+            camionesmostrar = camiones;
+          }));
+    });
     iniciarLocalizacion();
     timer = Timer.periodic(Duration(seconds: 1), (Timer t) async {
       Provider.of<MarkerProvider>(context, listen: false)
@@ -88,15 +91,26 @@ class _MyAppState extends State<MainScreen>
       });
     });
     String url;
+    String? filtroaplicadotipo =
+        Provider.of<MarkerProvider>(context, listen: false)
+            .filtroaplicadorealizado;
     String? filtroaplicado =
         Provider.of<MarkerProvider>(context, listen: false).filtroaplicado;
     camionfiltradorealizado =
         Provider.of<MarkerProvider>(context, listen: false).filtroaplicado;
-    if (filtroaplicado == null) {
+    camionfiltradotiporealizado =
+        Provider.of<MarkerProvider>(context, listen: false)
+            .filtroaplicadorealizado;
+    if (filtroaplicado == null && filtroaplicadotipo == null) {
       url = "https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/obtener_ubicacion";
-    } else {
+    } else if (filtroaplicado != null) {
       url =
           "https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/obtener_ubicacion/$filtroaplicado";
+    } else if (filtroaplicadotipo != null) {
+      url =
+          "https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/obtener_ubicacion_tipo/$filtroaplicadotipo";
+    } else {
+      url = "";
     }
     var headers = {
       "Authorization": "Basic " +
@@ -303,83 +317,91 @@ class _MyAppState extends State<MainScreen>
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.fromLTRB(
-                                            31, 21, 10, 10),
+                                            17, 21, 10, 10),
                                         child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Container(
-                                              height: 31,
-                                              width: 51,
-                                              decoration: BoxDecoration(
-                                                color: Colors.green,
-                                                borderRadius:
-                                                    BorderRadius.vertical(
-                                                        top: Radius.circular(9),
-                                                        bottom:
-                                                            Radius.circular(9)),
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                    camionfiltradorealizado!
-                                                        .substring(0, 3),
-                                                    style: TextStyle(
-                                                      fontSize: 17,
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.w800,
-                                                    )),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      7, 0, 0, 4),
-                                              child: Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.directions_bus,
-                                                    color: Colors.white,
-                                                    size: 23,
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  height: 31,
+                                                  width: 49,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.green,
+                                                    borderRadius:
+                                                        BorderRadius.vertical(
+                                                            top:
+                                                                Radius.circular(
+                                                                    9),
+                                                            bottom:
+                                                                Radius.circular(
+                                                                    9)),
                                                   ),
-                                                  Padding(
-                                                    padding: const EdgeInsets
-                                                        .fromLTRB(17, 0, 0, 0),
+                                                  child: Center(
                                                     child: Text(
-                                                      camionfiltradorealizado!
-                                                          .substring(6),
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      style: TextStyle(
-                                                          fontSize: 18,
+                                                        camionfiltradorealizado!
+                                                            .substring(0, 3),
+                                                        style: TextStyle(
+                                                          fontSize: 15,
                                                           color: Colors.white,
                                                           fontWeight:
-                                                              FontWeight.w800),
-                                                    ),
+                                                              FontWeight.w800,
+                                                        )),
                                                   ),
-                                                  Padding(
-                                                    padding: const EdgeInsets
-                                                        .fromLTRB(41, 0, 0, 0),
-                                                    child: Icon(
-                                                      Icons.arrow_forward,
-                                                      color: Colors.white,
-                                                      size: 23,
-                                                    ),
+                                                ),
+                                                const SizedBox(width: 9),
+                                                Icon(
+                                                  Icons.directions_bus,
+                                                  color: Colors.white,
+                                                  size: 19,
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.fromLTRB(
+                                                          11, 0, 0, 0),
+                                                  child: Text(
+                                                    camionfiltradorealizado!
+                                                        .substring(6),
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        fontSize: 14,
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.w800),
                                                   ),
-                                                  Container(
-                                                    width: 35,
-                                                    alignment:
-                                                        Alignment.centerRight,
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.fromLTRB(
+                                                          25, 0, 0, 0),
+                                                  child: Icon(
+                                                    Icons.arrow_forward,
+                                                    color: Colors.white,
+                                                    size: 19,
+                                                  ),
+                                                ),
+                                                Container(
+                                                  width: 35,
+                                                  alignment:
+                                                      Alignment.centerRight,
+                                                  child: Center(
                                                     child: Text(
                                                         totalcamionesrealizado
                                                             .toString(),
                                                         style: TextStyle(
                                                             color: Colors.white,
-                                                            fontSize: 18,
+                                                            fontSize: 15,
                                                             fontWeight:
                                                                 FontWeight
                                                                     .w800)),
-                                                  )
-                                                ],
-                                              ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ],
                                         ),
@@ -389,191 +411,486 @@ class _MyAppState extends State<MainScreen>
                                 ),
                               ),
                             ])
-                      : Container(
-                          padding: const EdgeInsets.fromLTRB(17, 10, 17, 10),
-                          child: Center(
-                            child: Column(
+                      : markerProvider.filtroTipo
+                          ? Stack(
+                              alignment: AlignmentDirectional.bottomCenter,
                               children: [
-                                SizedBox(height: 40.0),
-                                SizedBox(height: 7),
-                                Stack(children: [
-                                  AnimatedOpacity(
-                                    opacity:
-                                        markerProvider.filtroChecar ? 0 : 1,
-                                    duration: Duration(seconds: 10),
-                                    child: ElevatedButton(
-                                      child: Row(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.search,
-                                                color: Colors.white70,
-                                                size: 40,
-                                              ),
-                                              SizedBox(width: 21),
-                                              Text(
-                                                '¿A donde quieres ir?',
-                                                style: TextStyle(
-                                                    fontSize: 19,
-                                                    color: Colors.white54),
-                                              ),
-                                            ],
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(15, 49, 0, 0),
+                                    child: Align(
+                                      alignment: Alignment.topLeft,
+                                      child: Container(
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            shape: CircleBorder(),
+                                            padding: EdgeInsets.all(21.0),
+                                            backgroundColor: Colors.orange,
                                           ),
-                                          Spacer(),
-                                          Icon(
-                                            Icons.keyboard_arrow_up,
+                                          child: Icon(
+                                            Icons.arrow_back,
                                             color: Colors.white70,
-                                            size: 40,
+                                            size: 31,
                                           ),
-                                        ],
-                                      ),
-                                      onPressed: () {
-                                        getCamiones()
-                                            .then((camiones) => setState(() {
-                                                  TodoslosCamiones = camiones;
-                                                }));
-                                        showModalBottomSheet(
-                                            backgroundColor: Colors.transparent,
-                                            isScrollControlled: true,
-                                            context: context,
-                                            builder: (context) {
-                                              return Padding(
-                                                padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                        0, 100, 0, 0),
-                                                child: Container(
-                                                    height:
-                                                        MediaQuery.of(context)
-                                                            .size
-                                                            .height,
-                                                    child: MyButton(
-                                                        TodoslosCamiones:
-                                                            TodoslosCamiones)),
-                                              );
+                                          onPressed: () {
+                                            markerProvider.quitarFiltro();
+                                            setState(() {
+                                              _opacidadfiltrar =
+                                                  _opacidadfiltrar == 1 ? 1 : 1;
                                             });
-                                        //Navigator.of(context).push(
-                                        //MaterialPageRoute(builder: (context) => MyButton()),
-                                        //);
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.orange,
-                                        padding:
-                                            EdgeInsets.fromLTRB(17, 11, 17, 11),
+                                          },
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ]),
-                              ],
-                            ),
-                          ),
-                        ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 35),
-                child: Container(
-                  height: 57,
-                  width: 311,
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(40)),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Container(
-                        width: 157,
-                        height: 51,
-                        decoration: BoxDecoration(
-                            color: Colors.orange,
-                            borderRadius: BorderRadius.circular(40)),
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ButtonStyle(
-                            elevation: MaterialStatePropertyAll(0),
-                              backgroundColor: _botonmostrar ?
-                                  MaterialStatePropertyAll(Colors.white) : MaterialStatePropertyAll(Colors.orange)),
-                          child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.near_me_outlined,
-                                  color: _botonmostrar ? Colors.grey : Colors.white,
-                                ),
-                                Text(_botonmostrar ? "" : "Cerca de ti",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 17,
-                                        color: Colors.white)),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 140,
-                        height: 51,
-                        decoration: BoxDecoration(
-                            color: Colors.orange,
-                            borderRadius: BorderRadius.circular(40)),
-                        child: ElevatedButton(
-                          onPressed: botoncamionrealizado ? null : () {
-                           setState(() {
-                             botoncamionrealizado = true;
-                           });
-                           Provider.of<MarkerProvider>(context, listen: false).botonmostrar = true;
-                            final controllermodal = showCupertinoModalPopup(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return Padding(
-                                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        15, 0, 15, 31),
                                     child: Container(
-                                      height: MediaQuery.of(context).size.height,
-                                      child: camionscreenrealizado(camionesmostrar: camionesmostrar),
+                                      alignment: Alignment.bottomCenter,
+                                      height:
+                                          MediaQuery.of(context).size.height /
+                                              4.5,
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.vertical(
+                                              top: Radius.circular(40),
+                                              bottom: Radius.circular(40)),
+                                          color: markerProvider
+                                                      .filtroaplicadorealizado ==
+                                                  'MeMuevo'
+                                              ? Colors.green
+                                              : markerProvider
+                                                          .filtroaplicadorealizado ==
+                                                      'Transmetro'
+                                                  ? Colors.blueAccent
+                                                  : markerProvider
+                                                              .filtroaplicadorealizado ==
+                                                          'Ecovia'
+                                                      ? Colors.lightGreen
+                                                      : markerProvider
+                                                                  .filtroaplicadorealizado ==
+                                                              'UANL'
+                                                          ? Colors.blueAccent
+                                                          : Colors.orange),
+                                      child: Column(
+                                        children: [
+                                          Stack(
+                                            clipBehavior: Clip.none,
+                                            children: [
+                                              Positioned(
+                                                top: markerProvider
+                                                            .filtroaplicadorealizado ==
+                                                        'MeMuevo'
+                                                    ? 11
+                                                    : markerProvider
+                                                                .filtroaplicadorealizado ==
+                                                            'Ecovia'
+                                                        ? 17
+                                                        : markerProvider
+                                                                    .filtroaplicadorealizado ==
+                                                                'Transmetro'
+                                                            ? -21
+                                                            : markerProvider
+                                                                        .filtroaplicadorealizado ==
+                                                                    'UANL'
+                                                                ? -7
+                                                                : 11,
+                                                right: markerProvider
+                                                            .filtroaplicadorealizado ==
+                                                        'MeMuevo'
+                                                    ? 15
+                                                    : markerProvider
+                                                                .filtroaplicadorealizado ==
+                                                            'Ecovia'
+                                                        ? -131
+                                                        : markerProvider
+                                                                    .filtroaplicadorealizado ==
+                                                                'Transmetro'
+                                                            ? -17
+                                                            : markerProvider
+                                                                        .filtroaplicadorealizado ==
+                                                                    'UANL'
+                                                                ? -55
+                                                                : 21,
+                                                child: Image.asset(
+                                                    markerProvider
+                                                                .filtroaplicadorealizado ==
+                                                            'MeMuevo'
+                                                        ? "lib/img/logo.png"
+                                                        : markerProvider
+                                                                    .filtroaplicadorealizado ==
+                                                                'Ecovia'
+                                                            ? "lib/img/ecovialogo.png"
+                                                            : markerProvider
+                                                                        .filtroaplicadorealizado ==
+                                                                    'Transmetro'
+                                                                ? "lib/img/transmetrologo.png"
+                                                                : markerProvider
+                                                                            .filtroaplicadorealizado ==
+                                                                        'UANL'
+                                                                    ? "lib/img/logouanl.png"
+                                                                    : "lib/img/logo.png",
+                                                    opacity: markerProvider
+                                                                    .filtroaplicadorealizado !=
+                                                                'MeMuevo' &&
+                                                            markerProvider
+                                                                    .filtroaplicadorealizado !=
+                                                                'UANL'
+                                                        ? AlwaysStoppedAnimation(
+                                                            0.29)
+                                                        : null,
+                                                    color: markerProvider
+                                                                .filtroaplicadorealizado ==
+                                                            'MeMuevo'
+                                                        ? Colors.yellow
+                                                            .withOpacity(0.29)
+                                                        : null),
+                                                height: markerProvider
+                                                            .filtroaplicadorealizado ==
+                                                        'MeMuevo'
+                                                    ? 170
+                                                    : markerProvider
+                                                                .filtroaplicadorealizado ==
+                                                            'Ecovia'
+                                                        ? 130
+                                                        : markerProvider
+                                                                    .filtroaplicadorealizado ==
+                                                                'Transmetro'
+                                                            ? 240
+                                                            : markerProvider
+                                                                        .filtroaplicadorealizado ==
+                                                                    'UANL'
+                                                                ? 190
+                                                                : 130,
+                                              ),
+                                              Positioned(
+                                                top: markerProvider
+                                                            .filtroaplicadorealizado ==
+                                                        'MeMuevo'
+                                                    ? -60
+                                                    : markerProvider
+                                                                .filtroaplicadorealizado ==
+                                                            'Ecovia'
+                                                        ? -90
+                                                        : markerProvider
+                                                                    .filtroaplicadorealizado ==
+                                                                'Transmetro'
+                                                            ? -60
+                                                            : markerProvider
+                                                                        .filtroaplicadorealizado ==
+                                                                    'UANL'
+                                                                ? -60
+                                                                : -60,
+                                                right: markerProvider
+                                                            .filtroaplicadorealizado ==
+                                                        'MeMuevo'
+                                                    ? -12
+                                                    : markerProvider
+                                                                .filtroaplicadorealizado ==
+                                                            'Ecovia'
+                                                        ? -30
+                                                        : markerProvider
+                                                                    .filtroaplicadorealizado ==
+                                                                'Transmetro'
+                                                            ? -12
+                                                            : markerProvider
+                                                                        .filtroaplicadorealizado ==
+                                                                    'UANL'
+                                                                ? -42
+                                                                : -22,
+                                                child: Image.asset(
+                                                  markerProvider
+                                                              .filtroaplicadorealizado ==
+                                                          'MeMuevo'
+                                                      ? "lib/img/camionicon.png"
+                                                      : markerProvider
+                                                                  .filtroaplicadorealizado ==
+                                                              'Ecovia'
+                                                          ? "lib/img/busicon.png"
+                                                          : markerProvider
+                                                                      .filtroaplicadorealizado ==
+                                                                  'Transmetro'
+                                                              ? "lib/img/transmetrocamion.png"
+                                                              : markerProvider
+                                                                          .filtroaplicadorealizado ==
+                                                                      'UANL'
+                                                                  ? "lib/img/transmetrocamion.png"
+                                                                  : "lib/img/camionicon.png",
+                                                  height: markerProvider
+                                                              .filtroaplicadorealizado ==
+                                                          'MeMuevo'
+                                                      ? 105
+                                                      : markerProvider
+                                                                  .filtroaplicadorealizado ==
+                                                              'Ecovia'
+                                                          ? 170
+                                                          : markerProvider
+                                                                      .filtroaplicadorealizado ==
+                                                                  'Transmetro'
+                                                              ? 105
+                                                              : markerProvider
+                                                                          .filtroaplicadorealizado ==
+                                                                      'UANL'
+                                                                  ? 105
+                                                                  : 115,
+                                                  opacity:
+                                                      AlwaysStoppedAnimation(
+                                                          .8),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        0, 65, 0, 0),
+                                                child: Column(
+                                                  children: [
+                                                    Text(
+                                                        camionfiltradotiporealizado!
+                                                            .substring(0),
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w900,
+                                                          fontSize: 24,
+                                                          letterSpacing: 4.0,
+                                                        )),
+                                                    Text(
+                                                        totalcamionesrealizado
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w900,
+                                                          fontSize: 24,
+                                                          letterSpacing: 4.0,
+                                                        )),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  );
-                            });
-                            controllermodal.then((_) {
-                              Provider.of<MarkerProvider>(context, listen: false).botonmostrar = false;
-                              setState(() {
-                                botoncamionrealizado = false;
-                              });
-                            });
-                          },
-                          style: ButtonStyle(
-                            elevation: MaterialStatePropertyAll(0),
-                              backgroundColor: _botonmostrar ?
-                                  MaterialStatePropertyAll(Colors.orange) : MaterialStatePropertyAll(Colors.white)),
-                          child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.polyline_outlined,
-                                  color: _botonmostrar ? Colors.white : Colors.grey,
+                                  ),
+                                ])
+                          : Container(
+                              padding:
+                                  const EdgeInsets.fromLTRB(17, 10, 17, 10),
+                              child: Center(
+                                child: Column(
+                                  children: [
+                                    SizedBox(height: 40.0),
+                                    SizedBox(height: 7),
+                                    Stack(children: [
+                                      AnimatedOpacity(
+                                        opacity: markerProvider.filtroChecar ||
+                                                markerProvider.filtroTipo
+                                            ? 0
+                                            : 1,
+                                        duration: Duration(seconds: 10),
+                                        child: ElevatedButton(
+                                          child: Row(
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.search,
+                                                    color: Colors.white70,
+                                                    size: 40,
+                                                  ),
+                                                  SizedBox(width: 21),
+                                                  Text(
+                                                    '¿A donde quieres ir?',
+                                                    style: TextStyle(
+                                                        fontSize: 19,
+                                                        color: Colors.white54),
+                                                  ),
+                                                ],
+                                              ),
+                                              Spacer(),
+                                              Icon(
+                                                Icons.keyboard_arrow_up,
+                                                color: Colors.white70,
+                                                size: 40,
+                                              ),
+                                            ],
+                                          ),
+                                          onPressed: () {
+                                            getCamiones().then(
+                                                (camiones) => setState(() {
+                                                      TodoslosCamiones =
+                                                          camiones;
+                                                    }));
+                                            showModalBottomSheet(
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                isScrollControlled: true,
+                                                context: context,
+                                                builder: (context) {
+                                                  return Padding(
+                                                    padding: const EdgeInsets
+                                                        .fromLTRB(0, 100, 0, 0),
+                                                    child: Container(
+                                                        height: MediaQuery.of(
+                                                                context)
+                                                            .size
+                                                            .height,
+                                                        child: MyButton(
+                                                            TodoslosCamiones:
+                                                                TodoslosCamiones)),
+                                                  );
+                                                });
+                                            //Navigator.of(context).push(
+                                            //MaterialPageRoute(builder: (context) => MyButton()),
+                                            //);
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.orange,
+                                            padding: EdgeInsets.fromLTRB(
+                                                17, 11, 17, 11),
+                                          ),
+                                        ),
+                                      ),
+                                    ]),
+                                  ],
                                 ),
-                                Text(_botonmostrar ? "Rutas" : "",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 17,
-                                        color: Colors.white)),
-                              ],
+                              ),
                             ),
-                          ),
+            ),
+            markerProvider.filtroTipo || markerProvider.filtroChecar
+                ? Container()
+                : Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 35),
+                      child: Container(
+                        height: 57,
+                        width: 311,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(40)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Container(
+                              width: 157,
+                              height: 51,
+                              decoration: BoxDecoration(
+                                  color: Colors.orange,
+                                  borderRadius: BorderRadius.circular(40)),
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ButtonStyle(
+                                    elevation: MaterialStatePropertyAll(0),
+                                    backgroundColor: _botonmostrar
+                                        ? MaterialStatePropertyAll(Colors.white)
+                                        : MaterialStatePropertyAll(
+                                            Colors.orange)),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.near_me_outlined,
+                                        color: _botonmostrar
+                                            ? Colors.grey
+                                            : Colors.white,
+                                      ),
+                                      Text(_botonmostrar ? "" : "Cerca de ti",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 17,
+                                              color: Colors.white)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: 140,
+                              height: 51,
+                              decoration: BoxDecoration(
+                                  color: Colors.orange,
+                                  borderRadius: BorderRadius.circular(40)),
+                              child: ElevatedButton(
+                                onPressed: botoncamionrealizado
+                                    ? null
+                                    : () {
+                                        setState(() {
+                                          botoncamionrealizado = true;
+                                        });
+                                        Provider.of<MarkerProvider>(context,
+                                                listen: false)
+                                            .botonmostrar = true;
+                                        final controllermodal =
+                                            showCupertinoModalPopup(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return Padding(
+                                                    padding: const EdgeInsets
+                                                        .fromLTRB(0, 0, 0, 0),
+                                                    child: Container(
+                                                      height:
+                                                          MediaQuery.of(context)
+                                                              .size
+                                                              .height,
+                                                      child: camionscreenrealizado(
+                                                          mapcontrollerrealizado:
+                                                              mapController,
+                                                          camionesmostrar:
+                                                              camionesmostrar),
+                                                    ),
+                                                  );
+                                                });
+                                        controllermodal.then((_) {
+                                          Provider.of<MarkerProvider>(context,
+                                                  listen: false)
+                                              .botonmostrar = false;
+                                          setState(() {
+                                            botoncamionrealizado = false;
+                                          });
+                                        });
+                                      },
+                                style: ButtonStyle(
+                                    elevation: MaterialStatePropertyAll(0),
+                                    backgroundColor: _botonmostrar
+                                        ? MaterialStatePropertyAll(
+                                            Colors.orange)
+                                        : MaterialStatePropertyAll(
+                                            Colors.white)),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.polyline_outlined,
+                                        color: _botonmostrar
+                                            ? Colors.white
+                                            : Colors.grey,
+                                      ),
+                                      Text(_botonmostrar ? "Rutas" : "",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 17,
+                                              color: Colors.white)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ),
             Stack(children: [
               AnimatedPositioned(
                 right: 0,
-                bottom: markerProvider.filtroChecar ? 150 : 0,
+                bottom: markerProvider.filtroChecar || markerProvider.filtroTipo
+                    ? 150
+                    : 0,
                 duration: Duration(seconds: 1),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,

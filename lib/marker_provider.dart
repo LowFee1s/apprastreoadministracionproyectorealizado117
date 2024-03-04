@@ -6,17 +6,29 @@ class MarkerProvider with ChangeNotifier {
   Set<Marker> get markers => _markers;
 
   String? _filtroaplicado;
+  String? _filtroaplicadorealizado;
+  int _cantidadcamionesrealizado = 10;
   bool _filtroChecar = false;
+  bool _filtrotipo = false;
 
   bool _botonmostrar = false;
+
+  List<bool> _botoncardrealizado = [];
 
   bool _botoncamiones = false;
 
   bool get botonmostrar => _botonmostrar;
 
+  int get cantidadcamionesrealizado => _cantidadcamionesrealizado;
+
+  bool getbotoncardrealizado(int index) => _botoncardrealizado[index];
+
   bool get botoncamiones => _botoncamiones;
 
   bool get filtroChecar => _filtroChecar;
+  bool get filtroTipo => _filtrotipo;
+
+  String? get filtroaplicadorealizado => _filtroaplicadorealizado;
 
   String? get filtroaplicado => _filtroaplicado;
 
@@ -25,8 +37,22 @@ class MarkerProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  set filtroTipo(bool valor) {
+    _filtrotipo = valor;
+    notifyListeners();
+  }
+
+  MarkerProvider() {
+    _botoncardrealizado = List<bool>.filled(_cantidadcamionesrealizado, false);
+  }
+
   set botoncamiones (bool valor11) {
     _botoncamiones = valor11;
+    notifyListeners();
+  }
+
+  void setbotoncardrealizado(int index, bool valor17) {
+    _botoncardrealizado[index] = valor17;
     notifyListeners();
   }
 
@@ -40,6 +66,16 @@ class MarkerProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  set filtroaplicadorealizado(String? valor17) {
+    _filtroaplicadorealizado = valor17;
+    notifyListeners();
+  }
+
+  set cantidadcamionesrealizado(int valor) {
+    _cantidadcamionesrealizado = valor;
+    notifyListeners();
+  }
+
   void updateMarkers(Set<Marker> newMarkers) {
     _markers = newMarkers;
     notifyListeners();
@@ -47,6 +83,8 @@ class MarkerProvider with ChangeNotifier {
 
   void quitarFiltro() {
     _filtroChecar = false;
+    _filtrotipo = false;
+    _filtroaplicadorealizado = null;
     _filtroaplicado = null;
     notifyListeners();
   }
