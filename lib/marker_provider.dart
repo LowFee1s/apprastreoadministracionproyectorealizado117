@@ -12,11 +12,15 @@ class MarkerProvider with ChangeNotifier {
   bool _filtrotipo = false;
 
   bool _botonmostrar = false;
+  LatLng _datosdispositivo = LatLng(0, 0);
 
   List<bool> _botoncardrealizado = [];
+  Map<String, dynamic> _datosfirestore = {};
+  Map<String, dynamic> get datosfirestore => _datosfirestore;
 
   bool _botoncamiones = false;
 
+  LatLng get datosdispositivo => _datosdispositivo;
   bool get botonmostrar => _botonmostrar;
 
   int get cantidadcamionesrealizado => _cantidadcamionesrealizado;
@@ -51,6 +55,11 @@ class MarkerProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setdatosdispositivo(LatLng valor) {
+    _datosdispositivo = valor;
+    notifyListeners();
+  }
+
   void setbotoncardrealizado(int index, bool valor17) {
     _botoncardrealizado[index] = valor17;
     notifyListeners();
@@ -78,6 +87,11 @@ class MarkerProvider with ChangeNotifier {
 
   void updateMarkers(Set<Marker> newMarkers) {
     _markers = newMarkers;
+    notifyListeners();
+  }
+
+  void setDatosFirestore(Map<String, dynamic> datos) {
+    _datosfirestore = datos;
     notifyListeners();
   }
 

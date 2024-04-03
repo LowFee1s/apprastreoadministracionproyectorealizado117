@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'dart:convert';
@@ -225,6 +226,12 @@ class _MyButtonState extends State<MyButton> {
 
   @override
   Widget build(BuildContext context) {
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
     ValueNotifier<List<String>?> todoslosCamionesNotifier =
         ValueNotifier<List<String>?>(widget.TodoslosCamiones);
     return Scaffold(
@@ -232,76 +239,93 @@ class _MyButtonState extends State<MyButton> {
       body: SafeArea(
         child: Column(
           children: [
-            Expanded(
-              child: Container(
+            Container(
                 decoration: BoxDecoration(
                     color: Color.fromRGBO(255, 207, 164, 1),
                     borderRadius: BorderRadius.only(
                       topRight: Radius.circular(40),
                       topLeft: Radius.circular(40),
                     )),
-                height: 150,
+                height: 172,
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
+                  // Esto agrega un scroll a el filtro porque ocupa espacio entonces hay que salir del
+                  // input para normal, pero si esta es pone un scroll ahi.
+                  child: Column(
+                      children: [
+                        SizedBox(height: 15),
+                        Container(
+                          width: 200,
+                          height: 10,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(50)),
+                          child: ElevatedButton(
+                            child: Container(),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 41),
+                        Material(
+                          color: Colors.transparent,
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(50),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.grey.withOpacity(0.7),
+                                      spreadRadius: 5,
+                                      blurRadius: 7,
+                                      offset: Offset(0, 3)),
+                                ]),
+                            child: Padding(
+                              padding:
+                              const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                              child: Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: AutocompleteWidget(
+                                        controller: _controller,
+                                        todoslosCamiones:
+                                        todoslosCamionesNotifier),
+                                  ),
+                                  IconButton(
+                                      icon: _estacargando || _estacargandotipo
+                                          ? CircularProgressIndicator()
+                                          : Icon(Icons.search),
+                                      onPressed: _estacargando || _estacargandotipo
+                                          ? null
+                                          : handleSearch),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                ),
+              ),
+
+
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Color.fromRGBO(255, 207, 164, 1),
+                   ),
+                height: 150,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 1, 10, 10),
                   // Esto agrega un scroll a el filtro porque ocupa espacio entonces hay que salir del
                   // input para normal, pero si esta es pone un scroll ahi.
                   child: SingleChildScrollView(
                     child: Column(
                           children: [
-                            SizedBox(height: 15),
-                            Container(
-                              width: 200,
-                              height: 10,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(50)),
-                              child: ElevatedButton(
-                                child: Container(),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ),
-                            SizedBox(height: 41),
-                            Material(
-                                    color: Colors.transparent,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(50),
-                                          boxShadow: [
-                                            BoxShadow(
-                                                color: Colors.grey.withOpacity(0.7),
-                                                spreadRadius: 5,
-                                                blurRadius: 7,
-                                                offset: Offset(0, 3)),
-                                          ]),
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              child: AutocompleteWidget(
-                                                  controller: _controller,
-                                                  todoslosCamiones:
-                                                      todoslosCamionesNotifier),
-                                            ),
-                                            IconButton(
-                                                icon: _estacargando || _estacargandotipo
-                                                    ? CircularProgressIndicator()
-                                                    : Icon(Icons.search),
-                                                onPressed: _estacargando || _estacargandotipo
-                                                    ? null
-                                                    : handleSearch),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                            const SizedBox(height: 35),
                             Container(
                               height: MediaQuery.of(context).size.height / 1.5,
                               decoration: BoxDecoration(
@@ -424,11 +448,10 @@ class _MyButtonState extends State<MyButton> {
                                           ],
                                         ),
                                       ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.fromLTRB(11, 30, 17, 0),
+                                      SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                                      Center(
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             Container(
                                               height: 150,
@@ -479,49 +502,6 @@ class _MyButtonState extends State<MyButton> {
                                                   ],
                                                 ),
                                                 onPressed: _estacargando || _estacargandotipo ? null : () {handleFilter("Transmetro");},
-                                              ),
-                                            ),
-                                            const SizedBox(width: 1),
-                                            Container(
-                                              height: 150,
-                                              width: 150,
-                                              decoration: BoxDecoration(
-                                                  color: Colors.blueAccent,
-                                                  borderRadius:
-                                                      BorderRadius.circular(35)),
-                                              child: ElevatedButton(
-                                                style: ButtonStyle(
-                                                  elevation:
-                                                      MaterialStatePropertyAll(0),
-                                                  backgroundColor:
-                                                      MaterialStatePropertyAll(
-                                                          Colors.blueAccent),
-                                                ),
-                                                child: Stack(
-                                                  clipBehavior: Clip.none,
-                                                  children: [
-                                                    Positioned(
-                                                      top: -55,
-                                                      right: -41,
-                                                      child: Image.asset(
-                                                          "lib/img/logouanl.png",
-                                                          opacity:
-                                                              AlwaysStoppedAnimation(
-                                                                  0.59)),
-                                                      height: 155,
-                                                    ),
-                                                    Text('UANL',
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontWeight:
-                                                              FontWeight.w900,
-                                                          fontSize: 19,
-                                                          letterSpacing: 4.0,
-                                                        )),
-                                                  ],
-                                                ),
-                                                onPressed: _estacargando || _estacargandotipo
-                                                    ? null : () {handleFilter("UANL");},
                                               ),
                                             ),
                                           ],
