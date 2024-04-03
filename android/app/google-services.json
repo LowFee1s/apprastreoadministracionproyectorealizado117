@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "903573301568",
+    "project_id": "rastreoproyecto",
+    "storage_bucket": "rastreoproyecto.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903573301568:android:321c9a1c606759e5c532a5",
+        "android_client_info": {
+          "package_name": "com.example.apprastreoadministracionproyectorealizado"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxdkdwt_B9Xf-XgTK4ZO0slUpVUheX5Nw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
