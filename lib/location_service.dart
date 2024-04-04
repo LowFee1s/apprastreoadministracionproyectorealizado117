@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 
-void enviarLocalizacion(currentuser, datos, Position position, _direction) async {
+void enviarLocalizacion(currentuser, direccion11, datos, Position position, _direction) async {
   // Your code here...
   if (currentuser != null) {
     if (datos['tipo_user'] == 'camion') {
@@ -42,6 +42,7 @@ void enviarLocalizacion(currentuser, datos, Position position, _direction) async
         ],
         'Direccion': _direction,
         'Tipo': '${datos['tipo_camion']}',
+        'Lugar': direccion11,
         'localizacion': {'lat': position.latitude, 'lng': position.longitude}
       });
 

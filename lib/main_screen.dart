@@ -208,7 +208,42 @@ class _MyAppState extends State<MainScreen>
       intervalDuration: Duration(seconds: 1),
     ).listen(
       (Position position) async {
-        enviarLocalizacion(currentuser!.uid, Provider.of<MarkerProvider>(context, listen: false).datosfirestore, position, _direction);
+        String direccion11 = '';
+        try {
+          var response = await http.get(Uri.parse(
+              'https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=AIzaSyAw2XSrncREAXbnAWDN_eHfesp_5YmvVsM'));
+
+          if (response.statusCode == 200) {
+            var data = jsonDecode(response.body);
+            var results = data['results'];
+            if (results.isNotEmpty) {
+              var addressComponents = results[0]['address_components'];
+              String route = '';
+              String locality = '';
+              String streetNumber = '';
+
+              for (var component in addressComponents) {
+                var types = component['types'];
+                if (types.contains('route')) {
+                  route = component['long_name'];
+                } else if (types.contains('locality')) {
+                  locality = component['long_name'];
+                } else if (types.contains('street_number')) {
+                  streetNumber = component['long_name'];
+                }
+              }
+
+              direccion11 = '$streetNumber, $route, $locality';
+
+            }
+          } else {
+            print("No se pudo obtener la dirección");
+          }
+        } catch (e) {
+          print("Error al obtener la dirección: $e");
+        }
+
+        enviarLocalizacion(currentuser!.uid, direccion11, Provider.of<MarkerProvider>(context, listen: false).datosfirestore, position, _direction);
         CompassEvent? compassEvent = await FlutterCompass.events?.first;
         double? direction = compassEvent != null ? compassEvent.heading : null;
 

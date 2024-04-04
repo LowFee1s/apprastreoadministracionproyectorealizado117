@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
@@ -211,11 +212,13 @@ class _camionrealizado extends State<camionscreenrealizado> {
                       child: camiones11.length >= 1 ? ListView.builder(
                           itemCount: camiones11.length,
                           itemBuilder: (context, index) {
+                            if (index == 0) {
+                                        Provider.of<MarkerProvider>(context,
+                                                    listen: false)
+                                                .cantidadcamionesrealizado =
+                                            camiones11.length;
+                                      }
                             var camion = camiones11[index];
-                            Provider.of<MarkerProvider>(context,
-                                listen: false)
-                                .cantidadcamionesrealizado =
-                                camiones11.length;
                             var numerocamion = index + 1;
                             return CardCamion(
                                 mapcontrollerrealizado:
@@ -243,11 +246,13 @@ class _camionrealizado extends State<camionscreenrealizado> {
                           child: camiones1.length >= 1 ? ListView.builder(
                               itemCount: camiones1.length,
                               itemBuilder: (context, index) {
+                                if (index == 0) {
+                                  Provider.of<MarkerProvider>(context,
+                                              listen: false)
+                                          .cantidadcamionesrealizado =
+                                      camiones1.length;
+                                }
                                 var camion = camiones1[index];
-                                Provider.of<MarkerProvider>(context,
-                                    listen: false)
-                                    .cantidadcamionesrealizado =
-                                    camiones1.length;
                                 var numerocamion = index + 1;
                                 return CardCamion(
                                     mapcontrollerrealizado:
@@ -274,11 +279,13 @@ class _camionrealizado extends State<camionscreenrealizado> {
                             child: camiones.length >= 1 ? ListView.builder(
                                 itemCount: camiones.length,
                                 itemBuilder: (context, index) {
+                                  if (index == 0) {
+                                    Provider.of<MarkerProvider>(context,
+                                                listen: false)
+                                            .cantidadcamionesrealizado =
+                                        camiones.length;
+                                  }
                                   var camion = camiones[index];
-                                  Provider.of<MarkerProvider>(context,
-                                              listen: false)
-                                          .cantidadcamionesrealizado =
-                                      camiones.length;
                                   var numerocamion = index + 1;
                                   return CardCamion(
                                       mapcontrollerrealizado:
@@ -410,20 +417,30 @@ class CardCamion extends StatefulWidget {
 }
 
 class _CardCamionState extends State<CardCamion> {
-  late Future<String> arrivalTimeFuture;
-  late Future<String> locationNameFuture;
+  late Future<String> arrivalTimeFuture = Future.value("....");
+  late Future<String> locationNameFuture = Future.value("....");
+  Timer? timer;
   bool firstTime = true;
   bool firstTime1 = true;
 
   @override
   void initState() {
     super.initState();
+    timer = Timer.periodic(Duration(seconds: 5), (Timer t) {
+      if (mounted) {
+        setState(() {
+          arrivalTimeFuture = calculateArrivalTimes();
+          locationNameFuture = getLocationName();
+        });
+      }
+    });
+
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    arrivalTimeFuture = calculateArrivalTimes();
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
   }
 
   Future<String> calculateArrivalTimes() async {
@@ -515,6 +532,7 @@ class _CardCamionState extends State<CardCamion> {
 
     MarkerProvider markerProvider = Provider.of<MarkerProvider>(context);
     String camionnombre = widget.camion['Camion'];
+    List<String> partes = widget.camion['Lugar'].split(", ");
     return Center(
       child: Card(
         color: Colors.white,
@@ -581,13 +599,13 @@ class _CardCamionState extends State<CardCamion> {
                           children: [
                             Icon(Icons.access_time, color: Colors.grey),
                             const SizedBox(width: 8),
-                            FutureBuilder(
+                            FutureBuilder<String>(
                                 future: arrivalTimeFuture,
                                 builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                                   if (snapshot.connectionState == ConnectionState.waiting) {
-                                    return Text(textAlign: TextAlign.start, snapshot.data ?? "Calculando....", style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.03, color: Colors.grey));
+                                    return Text("....", style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.03, color: Colors.grey));
                                   } else if (snapshot.hasError) {
-                                    return Text("Error al calcular", style: TextStyle(fontSize: 14, color: Colors.grey));
+                                    return Text("Error al calcular", style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.03, color: Colors.grey));
                                   } else {
                                     return Text(textAlign: TextAlign.start, snapshot.data ?? "Calculando....", style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.03, color: Colors.grey));
                                   }
@@ -601,20 +619,28 @@ class _CardCamionState extends State<CardCamion> {
                             Icon(Icons.location_on_outlined,
                                 color: Colors.grey),
                             const SizedBox(width: 8),
+                            /*RichText(text: TextSpan(
+                                text: partes[0] + ",\n",
+                                style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.029, color: Colors.grey),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                      text: partes[1] + ",\n",
+                                      style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.029, color: Colors.grey)),
+                                  TextSpan(
+                                      text: partes[2],
+                                      style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.029, color: Colors.grey))
+                                ]
+                            )), */
+
                             FutureBuilder(
-                                future: getLocationName(),
+                                future: locationNameFuture,
                                 builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                                   if (snapshot.connectionState == ConnectionState.waiting) {
-                                    return Text(
-                                        snapshot.data ?? "Cargando....",
-                                        style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.029, color: Colors.grey),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                    );
+                                    return Text(snapshot.data ?? "....", style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.03, color: Colors.grey));
                                   } else if (snapshot.hasError) {
-                                    return Text("Error al calcular", style: TextStyle(fontSize: 14, color: Colors.grey));
+                                    return Text("Error al calcular", style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.03, color: Colors.grey));
                                   } else {
-                                    return Text(snapshot.data ?? "Ubicacion desconocida.", style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.029, color: Colors.grey));
+                                    return Text(snapshot.data ?? "Calculando....", style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.03, color: Colors.grey));
                                   }
                                 }
                             ),
