@@ -27,6 +27,113 @@ class _camionrealizado extends State<camionscreenrealizado> {
 
   bool _botoncamiones = false;
   bool _botoncamiones1 = false;
+  Timer? timer;
+  bool firstTime = true;
+  bool firstTime1 = true;
+
+  @override
+  void initState() {
+    super.initState();
+    MarkerProvider markerProvider = Provider.of<MarkerProvider>(context, listen: false);
+    timer = Timer.periodic(Duration(seconds: 5), (Timer t) {
+      for (var camion in widget.camionesmostrar) {
+        markerProvider.arrivalTime[camion['IdCamion']] =
+            calculateArrivalTimes(camion);
+        markerProvider.locationName[camion['IdCamion']] =
+            getLocationName(camion);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  Future<String> calculateArrivalTimes(Map<String, dynamic> camion) async {
+   MarkerProvider markerProvider = Provider.of<MarkerProvider>(context, listen: false);
+    LatLng currentLocation = markerProvider.datosdispositivo;
+    if (currentLocation == null) {
+      return "No se pudo obtener la ubicación";
+    }
+   /*
+
+    try {
+      currentLocation = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+    } on Exception {
+      print('No se pudo obtener la ubicación');
+      return "Error al obtener la ubicación";
+    } */
+
+    var response = await http.get(Uri.parse(
+        'https://maps.googleapis.com/maps/api/directions/json?origin=${camion['localizacion']['lat']},${camion['localizacion']['lng']}&destination=${currentLocation.latitude},${currentLocation.longitude}&key=AIzaSyAw2XSrncREAXbnAWDN_eHfesp_5YmvVsM'));
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      var routes = data['routes'];
+      if (routes.isNotEmpty) {
+        var legs = routes[0]['legs'];
+        if (legs.isNotEmpty) {
+          var duration = legs[0]['duration'];
+          if (firstTime) {
+            firstTime = false;
+            return "....";
+          }
+          return duration['text'];
+        }
+      }
+    } else {
+      print("No se pudo obtener la duración del viaje");
+      return "Error al obtener la duración del viaje";
+    }
+    return "No se pudo obtener la duración del viaje";
+}
+
+  Future<String> getLocationName(Map<String, dynamic> camion) async {
+    try {
+      var response = await http.get(Uri.parse(
+          'https://maps.googleapis.com/maps/api/geocode/json?latlng=${camion['localizacion']['lat']},${camion['localizacion']['lng']}&key=AIzaSyAw2XSrncREAXbnAWDN_eHfesp_5YmvVsM'));
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        var results = data['results'];
+        if (results.isNotEmpty) {
+          var addressComponents = results[0]['address_components'];
+          String route = '';
+          String locality = '';
+          String streetNumber = '';
+
+          for (var component in addressComponents) {
+            var types = component['types'];
+            if (types.contains('route')) {
+              route = component['long_name'];
+            } else if (types.contains('locality')) {
+              locality = component['long_name'];
+            } else if (types.contains('street_number')) {
+              streetNumber = component['long_name'];
+            }
+          }
+
+          if (firstTime1) {
+            firstTime1 = false;
+            return "....";
+          }
+
+          return '$streetNumber,\n $route,\n $locality';
+
+        }
+      } else {
+        print("No se pudo obtener la dirección");
+        return "Error al obtener la dirección";
+      }
+    } catch (e) {
+      print("Error al obtener la dirección: $e");
+      return "Error al obtener la dirección";
+    }
+    return "No se pudo obtener la dirección";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -417,8 +524,8 @@ class CardCamion extends StatefulWidget {
 }
 
 class _CardCamionState extends State<CardCamion> {
-  late Future<String> arrivalTimeFuture = Future.value("....");
-  late Future<String> locationNameFuture = Future.value("....");
+ // late Future<String> arrivalTimeFuture = Future.value("....");
+//  late Future<String> locationNameFuture = Future.value("....");
   Timer? timer;
   bool firstTime = true;
   bool firstTime1 = true;
@@ -429,8 +536,8 @@ class _CardCamionState extends State<CardCamion> {
     timer = Timer.periodic(Duration(seconds: 5), (Timer t) {
       if (mounted) {
         setState(() {
-          arrivalTimeFuture = calculateArrivalTimes();
-          locationNameFuture = getLocationName();
+         // arrivalTimeFuture = calculateArrivalTimes();
+         // locationNameFuture = getLocationName();
         });
       }
     });
@@ -532,6 +639,9 @@ class _CardCamionState extends State<CardCamion> {
 
     MarkerProvider markerProvider = Provider.of<MarkerProvider>(context);
     String camionnombre = widget.camion['Camion'];
+    String camionId = widget.camion['IdCamion'];
+    Future<String> arrivalTimeFuture = markerProvider.arrivalTime[camionId] ?? Future.value("....");
+    Future<String> locationNameFuture = markerProvider.locationName[camionId] ?? Future.value("....");
     List<String> partes = widget.camion['Lugar'].split(", ");
     return Center(
       child: Card(
@@ -632,7 +742,7 @@ class _CardCamionState extends State<CardCamion> {
                                 ]
                             )), */
 
-                            FutureBuilder(
+                           FutureBuilder(
                                 future: locationNameFuture,
                                 builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                                   if (snapshot.connectionState == ConnectionState.waiting) {

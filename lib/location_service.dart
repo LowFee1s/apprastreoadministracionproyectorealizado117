@@ -42,6 +42,7 @@ void enviarLocalizacion(currentuser, direccion11, datos, Position position, _dir
         ],
         'Direccion': _direction,
         'Tipo': '${datos['tipo_camion']}',
+        'IdCamion': Iddevice,
         'Lugar': direccion11,
         'localizacion': {'lat': position.latitude, 'lng': position.longitude}
       });

@@ -17,6 +17,8 @@ class MarkerProvider with ChangeNotifier {
   List<bool> _botoncardrealizado = [];
   Map<String, dynamic> _datosfirestore = {};
   Map<String, dynamic> get datosfirestore => _datosfirestore;
+  Map<String, Future<String>> arrivalTime = {};
+  Map<String, Future<String>> locationName = {};
 
   bool _botoncamiones = false;
 
