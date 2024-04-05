@@ -23,7 +23,7 @@ class _SettingPageState extends State<SettingPage> {
 
   User? user = FirebaseAuth.instance.currentUser;
   Map<String, dynamic> datos = {};
-  String _opcionseleccionada = "-----";
+  String _opcionseleccionada = "MeMuevo";
   final textoruta = TextEditingController();
 
   void initState() {
@@ -512,7 +512,7 @@ class _SettingPageState extends State<SettingPage> {
                                                                                 padding: const EdgeInsets.fromLTRB(21, 0, 21, 0),
                                                                                 child: CustomDropdownButton(
                                                                                   initialValue: _opcionseleccionada,
-                                                                                  items: ["-----", "MeMuevo", "Ecovia", "Transmetro"],
+                                                                                  items: ["MeMuevo", "Ecovia", "Transmetro"],
                                                                                   onValueChanged: (newValue) {
                                                                                       setState(() {
                                                                                         _opcionseleccionada = newValue;
