@@ -30,6 +30,9 @@ class _camionrealizado extends State<camionscreenrealizado> {
   Timer? timer;
   bool firstTime = true;
   bool firstTime1 = true;
+  MarkerProvider markerProviderCamion = MarkerProvider();
+  MarkerProvider markerProviderCamion11 = MarkerProvider();
+  MarkerProvider markerProviderCamion1 = MarkerProvider();
 
   @override
   void initState() {
@@ -331,7 +334,7 @@ class _camionrealizado extends State<camionscreenrealizado> {
                                 mapcontrollerrealizado:
                                 widget.mapcontrollerrealizado,
                                 camion: camion,
-                                numerocamion: numerocamion);
+                                numerocamion: numerocamion, markerProvider: markerProviderCamion11);
                           }) : Center(child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -365,7 +368,7 @@ class _camionrealizado extends State<camionscreenrealizado> {
                                     mapcontrollerrealizado:
                                     widget.mapcontrollerrealizado,
                                     camion: camion,
-                                    numerocamion: numerocamion);
+                                    numerocamion: numerocamion, markerProvider: markerProviderCamion1);
                               }) : Center(child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -398,7 +401,7 @@ class _camionrealizado extends State<camionscreenrealizado> {
                                       mapcontrollerrealizado:
                                           widget.mapcontrollerrealizado,
                                       camion: camion,
-                                      numerocamion: numerocamion);
+                                      numerocamion: numerocamion, markerProvider: markerProviderCamion);
                                 }) : Center(child: Column(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
@@ -512,11 +515,15 @@ class CardCamion extends StatefulWidget {
   final Map<String, dynamic> camion;
   final GoogleMapController? mapcontrollerrealizado;
   final int numerocamion;
+  final MarkerProvider markerProvider;
 
   CardCamion(
-      {required this.mapcontrollerrealizado,
-      required this.camion,
-      required this.numerocamion}
+      {
+        required this.mapcontrollerrealizado,
+        required this.camion,
+        required this.numerocamion,
+        required this.markerProvider,
+      }
   );
 
   @override
@@ -637,15 +644,16 @@ class _CardCamionState extends State<CardCamion> {
   @override
   Widget build(BuildContext context) {
 
-    MarkerProvider markerProvider = Provider.of<MarkerProvider>(context);
+    MarkerProvider markerProvider = widget.markerProvider;
+    MarkerProvider markerProvider1 = Provider.of<MarkerProvider>(context);
     String camionnombre = widget.camion['Camion'];
     String camionId = widget.camion['IdCamion'];
-    Future<String> arrivalTimeFuture = markerProvider.arrivalTime[camionId] ?? Future.value("....");
-    Future<String> locationNameFuture = markerProvider.locationName[camionId] ?? Future.value("....");
+    Future<String> arrivalTimeFuture = markerProvider1.arrivalTime[camionId] ?? Future.value("....");
+    Future<String> locationNameFuture = markerProvider1.locationName[camionId] ?? Future.value("....");
     List<String> partes = widget.camion['Lugar'].split(", ");
     return Center(
       child: Card(
-        color: Colors.white,
+        color: Colors.transparent,
         elevation: 0,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -674,9 +682,13 @@ class _CardCamionState extends State<CardCamion> {
                   backgroundColor: MaterialStatePropertyAll(Colors.transparent),
                 ),
                 onPressed: () {
-                  Provider.of<MarkerProvider>(context, listen: false)
-                      .setbotoncardrealizado(widget.numerocamion,
-                          !markerProvider.getbotoncardrealizado(widget.numerocamion));
+                  setState((){
+                    widget.markerProvider
+                        .setbotoncardrealizado(
+                            widget.numerocamion,
+                            !widget.markerProvider
+                                .getbotoncardrealizado(widget.numerocamion));
+                  });
                 },
                 child: Icon(
                   markerProvider.getbotoncardrealizado(widget.numerocamion)
