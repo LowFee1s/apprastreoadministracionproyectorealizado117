@@ -334,6 +334,8 @@ class _MyAppState extends State<MainScreen>
                 ),
                 polylines: _polylines,
                 myLocationButtonEnabled: false,
+                rotateGesturesEnabled: false,
+                mapToolbarEnabled: false,
                 myLocationEnabled: markerProvider.datosfirestore["tipo_user"] == "camion" ? false : true,
                 markers: Provider.of<MarkerProvider>(context).markers,
               ),

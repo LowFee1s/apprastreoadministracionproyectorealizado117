@@ -774,21 +774,6 @@ class _CardCamionState extends State<CardCamion> {
                     Column(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: <Widget>[
-                        SizedBox(
-                          height: 52,
-                          width: 90,
-                          child: TextButton(
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStatePropertyAll(Colors.blueAccent),
-                            ),
-                            child: const Text('Mostrar\n ruta',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 14, color: Colors.white)),
-                            onPressed: () {},
-                          ),
-                        ),
                         const SizedBox(height: 8),
                         SizedBox(
                           height: 52,
