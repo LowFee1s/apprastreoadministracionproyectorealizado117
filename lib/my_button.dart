@@ -124,7 +124,7 @@ class _MyButtonState extends State<MyButton> {
     print('Has ingresado: $camion');
 
     var url = Uri.parse(
-        "https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/obtener_ubicacion/$camion");
+        "https://chaosqrz.pythonanywhere.com/obtener_ubicacion/$camion");
     var headers = {
       "Authorization": "Basic " +
           base64Encode(utf8.encode(
@@ -179,7 +179,7 @@ class _MyButtonState extends State<MyButton> {
 
 
     var url = Uri.parse(
-        "https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/obtener_ubicacion_tipo/$camion");
+        "https://chaosqrz.pythonanywhere.com/obtener_ubicacion_tipo/$camion");
     var headers = {
       "Authorization": "Basic " +
           base64Encode(utf8.encode(

@@ -561,7 +561,7 @@ class _CardCamionState extends State<CardCamion> {
    MarkerProvider markerProvider = Provider.of<MarkerProvider>(context, listen: false);
     LatLng currentLocation = markerProvider.datosdispositivo;
     if (currentLocation == null) {
-      return "No se pudo obtener la ubicación";
+      return "....";
     }
    /*
 
@@ -592,9 +592,9 @@ class _CardCamionState extends State<CardCamion> {
       }
     } else {
       print("No se pudo obtener la duración del viaje");
-      return "Error al obtener la duración del viaje";
+      return "....";
     }
-    return "No se pudo obtener la duración del viaje";
+    return "....";
 }
 
   Future<String> getLocationName() async {
@@ -632,13 +632,13 @@ class _CardCamionState extends State<CardCamion> {
         }
       } else {
         print("No se pudo obtener la dirección");
-        return "Error al obtener la dirección";
+        return "....";
       }
     } catch (e) {
       print("Error al obtener la dirección: $e");
-      return "Error al obtener la dirección";
+      return "....";
     }
-    return "No se pudo obtener la dirección";
+    return "....";
   }
 
   @override

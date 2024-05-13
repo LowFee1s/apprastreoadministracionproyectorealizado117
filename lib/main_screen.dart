@@ -120,13 +120,13 @@ class _MyAppState extends State<MainScreen>
         Provider.of<MarkerProvider>(context, listen: false)
             .filtroaplicadorealizado;
     if (filtroaplicado == null && filtroaplicadotipo == null) {
-      url = "https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/obtener_ubicacion";
+      url = "https://chaosqrz.pythonanywhere.com/obtener_ubicacion";
     } else if (filtroaplicado != null) {
       url =
-          "https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/obtener_ubicacion/$filtroaplicado";
+          "https://chaosqrz.pythonanywhere.com/obtener_ubicacion/$filtroaplicado";
     } else if (filtroaplicadotipo != null) {
       url =
-          "https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/obtener_ubicacion_tipo/$filtroaplicadotipo";
+          "https://chaosqrz.pythonanywhere.com/obtener_ubicacion_tipo/$filtroaplicadotipo";
     } else {
       url = "";
     }

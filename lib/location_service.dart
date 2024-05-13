@@ -15,7 +15,7 @@ void enviarLocalizacion(currentuser, direccion11, datos, Position position, _dir
       String Iddevice = androidInfo.androidId;
 
       var url = Uri.parse(
-          'https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/update_ubicacion');
+          'https://chaosqrz.pythonanywhere.com/update_ubicacion');
       var headers = {
         "Content-type": "application/json",
         "Authorization": "Basic " +
@@ -79,7 +79,7 @@ void borrarubicacion() async {
   String Iddevice = androidInfo.androidId;
 
   var url = Uri.parse(
-      'https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/quitar_ubicacion');
+      'https://chaosqrz.pythonanywhere.com/quitar_ubicacion');
   var headers = {
     "Content-type": "application/json",
     "Authorization": "Basic " +
@@ -106,7 +106,7 @@ void actualizarruta(datos) async {
     String Iddevice = androidInfo.androidId;
 
     var url = Uri.parse(
-        'https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/actualizar_ruta');
+        'https://chaosqrz.pythonanywhere.com/actualizar_ruta');
     var headers = {
       "Content-type": "application/json",
       "Authorization": "Basic " +
@@ -137,7 +137,7 @@ void actualizartipocamion(datos) async {
     String Iddevice = androidInfo.androidId;
 
     var url = Uri.parse(
-        'https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/actualizar_tipo');
+        'https://chaosqrz.pythonanywhere.com/actualizar_tipo');
     var headers = {
       "Content-type": "application/json",
       "Authorization": "Basic " +
@@ -168,7 +168,7 @@ void actualizarcamion(datos) async {
     String Iddevice = androidInfo.androidId;
 
     var url = Uri.parse(
-        'https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/actualizar_camion');
+        'https://chaosqrz.pythonanywhere.com/actualizar_camion');
     var headers = {
       "Content-type": "application/json",
       "Authorization": "Basic " +

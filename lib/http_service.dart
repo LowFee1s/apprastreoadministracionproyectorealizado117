@@ -5,7 +5,7 @@ Future<List<String>> getCamiones() async {
   // Your code here...
 
   final url = Uri.parse(
-      "https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/camiones");
+      "https://chaosqrz.pythonanywhere.com/camiones");
   final headers = {
     "Authorization": "Basic " +
         base64Encode(utf8.encode(
@@ -21,7 +21,7 @@ Future<List<String>> getCamiones() async {
 }
 
 Future<List<Map<String, dynamic>>> cargarCamiones() async {
-  String url = "https://apiuanltracking-dev-sgeg.1.us-1.fl0.io/obtener_ubicacion";
+  String url = "https://chaosqrz.pythonanywhere.com/obtener_ubicacion";
   var headers = {
     "Authorization": "Basic " +
         base64Encode(utf8.encode(
