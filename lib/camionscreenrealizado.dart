@@ -591,7 +591,7 @@ class _CardCamionState extends State<CardCamion> {
         }
       }
     } else {
-      print("No se pudo obtener la duración del viaje");
+      print("....");
       return "....";
     }
     return "....";
@@ -631,11 +631,11 @@ class _CardCamionState extends State<CardCamion> {
 
         }
       } else {
-        print("No se pudo obtener la dirección");
+        print("....");
         return "....";
       }
     } catch (e) {
-      print("Error al obtener la dirección: $e");
+      print("....");
       return "....";
     }
     return "....";
