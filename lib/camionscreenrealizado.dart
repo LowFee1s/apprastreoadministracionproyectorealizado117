@@ -58,7 +58,7 @@ class _camionrealizado extends State<camionscreenrealizado> {
    MarkerProvider markerProvider = Provider.of<MarkerProvider>(context, listen: false);
     LatLng currentLocation = markerProvider.datosdispositivo;
     if (currentLocation == null) {
-      return "No se pudo obtener la ubicación";
+      return "....";
     }
    /*
 
@@ -88,10 +88,10 @@ class _camionrealizado extends State<camionscreenrealizado> {
         }
       }
     } else {
-      print("No se pudo obtener la duración del viaje");
-      return "Error al obtener la duración del viaje";
+      print("....");
+      return "....";
     }
-    return "No se pudo obtener la duración del viaje";
+    return "....";
 }
 
   Future<String> getLocationName(Map<String, dynamic> camion) async {
@@ -128,14 +128,14 @@ class _camionrealizado extends State<camionscreenrealizado> {
 
         }
       } else {
-        print("No se pudo obtener la dirección");
-        return "Error al obtener la dirección";
+        print("....");
+        return "....";
       }
     } catch (e) {
-      print("Error al obtener la dirección: $e");
-      return "Error al obtener la dirección";
+      print("....");
+      return "....";
     }
-    return "No se pudo obtener la dirección";
+    return "....";
   }
 
   @override
